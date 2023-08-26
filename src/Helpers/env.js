@@ -1,4 +1,9 @@
-import { ENV_VARS } from "../Config"
-export const env_vars = Object.keys(process.env).filter(key=>ENV_VARS.includes(key)).reduce(key=>{
-    key:process.env[key]
-})
+import { ENV_VARS } from "../Constants/global.constants.ts"
+export const env_vars = ENV_VARS.reduce((result, key) => {
+    if (process.env[key]) {
+        result[key] = process.env[key];
+    }
+    return result;
+}, {});
+
+
