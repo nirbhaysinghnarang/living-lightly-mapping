@@ -1,5 +1,5 @@
-import { Asset } from "./Asset"
-import { LatLng } from "./LatLng"
+import { Asset } from "./Asset.type"
+import { LatLng } from "./LatLng.type"
 import { Nullable } from 'tsdef';
 
 export interface BaseMapProps{
@@ -11,5 +11,7 @@ export interface BaseMapProps{
     insetMapProps: Nullable<BaseMapProps>,
     mapBounds: [LatLng, LatLng],
     mapStyle: string,
-    accessToken: string
+    accessToken: string,
+
+
 }

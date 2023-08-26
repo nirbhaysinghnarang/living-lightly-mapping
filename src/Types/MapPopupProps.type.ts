@@ -1,5 +1,5 @@
-import { PointOfInterest } from "./PointOfInterest";
-import { Asset } from "./Asset";
+import { PointOfInterest } from "./PointOfInterest.type";
+import { Asset } from "./Asset.type";
 import { Nullable } from "tsdef";
 import { ReactNode } from "react";
 

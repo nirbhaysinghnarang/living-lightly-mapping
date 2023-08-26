@@ -1,4 +1,4 @@
-import { Asset } from "../Types/Asset";
+import { Asset } from "../Types/Asset.type";
 export const CONSTANT_ASSETS: Asset[] = [
     {
         id: "MAP_OVERLAY_ASSET",
