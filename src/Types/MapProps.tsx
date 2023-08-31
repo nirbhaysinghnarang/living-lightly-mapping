@@ -2,16 +2,16 @@ import { Asset } from "./Asset.type"
 import { LatLng } from "./LatLng.type"
 import { Nullable } from 'tsdef';
 
-export interface BaseMapProps{
+export interface MapProps{
     assetList: Asset[],
     mapZoom: number,
     mapCenter: LatLng,
     zoomMinMax: [number, number],
-    hasInsetMap: boolean,
-    insetMapProps: Nullable<BaseMapProps>,
     mapBounds: [LatLng, LatLng],
     mapStyle: string,
     accessToken: string,
+    insetMapProps: Nullable<MapProps>,
+    hasInset: boolean
 
 
 }

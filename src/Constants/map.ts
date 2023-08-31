@@ -1,5 +1,5 @@
 import { LatLng } from "../Types/LatLng.type";
-import {CONSTANT_ASSETS} from './assets.constants.ts'
+import {CONSTANT_ASSETS} from './assets.ts'
 
 
 const BASE_MAP_ASSET_LIST: string[] = [
