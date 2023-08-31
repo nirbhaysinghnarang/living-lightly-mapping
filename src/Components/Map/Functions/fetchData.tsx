@@ -39,7 +39,6 @@ export async function fetchData(){
     const schemaQueue: levelInfo[] = unwrapSchema(Schema);
     var schemaStack = [schemaQueue[0]];
     var mapData = {}
-
     while (schemaStack){
         //get current level to look at
         const level = schemaStack.pop()!

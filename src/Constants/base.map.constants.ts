@@ -8,9 +8,9 @@ const BASE_MAP_ASSET_LIST: string[] = [
 ] 
 
 const BASE_MAP_ASSETS = CONSTANT_ASSETS.filter(asset=>BASE_MAP_ASSET_LIST.includes(asset.id));
-const BASE_MAP_INIT_ZOOM = 13
+const BASE_MAP_INIT_ZOOM = 6
 const BASE_MAP_ZOOM_MIN_MAX:[number, number] = [6,13]
-const BASE_MAP_CENTER:LatLng = {lat:0.0, lng:0.0}
+const BASE_MAP_CENTER:LatLng = {lat:20.5937, lng:78.9629}
 const BASE_MAP_BOUNDS:[LatLng, LatLng] = [{lat:0.0, lng:0.0},{lat:0.0, lng:0.0}]
 const BASE_MAP_HAS_INSET_MAP = false;
 
