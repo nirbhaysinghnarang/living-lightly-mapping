@@ -49,7 +49,7 @@ export type ChannelContent = {
 
 type MediaFile = {
     caption: Nullable<String>,
-    url:String
+    url:String,
 
 }
 

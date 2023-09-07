@@ -29,8 +29,9 @@ function _createEmptyChannel(): ChannelType{
  */
 export async function fetchData(channelId:string): Promise<ChannelType>{
     async function recurse(channelId:string, channel:ChannelType):Promise<ChannelType>{
-        return getChannel(channelId).then((channelResponse:AxiosResponse<ChannelType>)=>{
+        return await getChannel(channelId).then(async (channelResponse:AxiosResponse<ChannelType>)=>{
             const data:ChannelType = channelResponse.data
+
             channel.editors = data.editors
             channel.description = data.description
             channel.createdAt = data.createdAt
@@ -40,22 +41,21 @@ export async function fetchData(channelId:string): Promise<ChannelType>{
             channel.markercolor = data.markercolor
             channel.uniqueID = data.uniqueID
             channel.children = []
-            channel.order = data.order
             channel.name = data.name
+            channel.order = data.order
             channel.contents = []
 
             if(data.contents.length !==0){
                 channel.contents = data.contents
                 return channel
             }
-
             if (data.children.length !== 0){
-                data.children.forEach(async (child:ChannelType)=>  {
-                    channel.children.push(await recurse(child.uniqueID, child))
-                })
+                await Promise.all(data.children.map(async (child: ChannelType) => {
+                    channel.children.push(await recurse(child.uniqueID, child));
+                }));
             }
             return channel
         })
     }
-    return recurse(channelId,  _createEmptyChannel())
+    return await recurse(channelId,  _createEmptyChannel())
 }
