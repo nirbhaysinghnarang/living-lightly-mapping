@@ -6,10 +6,12 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { Marker, Map, MapProvider, Source, Layer, Popup } from 'react-map-gl';
 import { InsetMap } from "./map.inset.tsx";
 import { fetchData } from "./Functions/fetchData.tsx";
-import { ChannelType } from "../../Types/Channel.types.ts";
+import { ChannelContent, ChannelType } from "../../Types/Channel.types.ts";
 import { Menu as MapMenu } from "../menu.map.tsx";
 import { MenuOutlined } from "@mui/icons-material";
 import { panTo } from "./map.utils.tsx";
+import { renderCommunities } from "./map.utils.tsx";
+import { render } from "@testing-library/react";
 const _ = require('lodash');
 
 export const BaseMap: React.FC<MapProps> = ({
@@ -26,25 +28,41 @@ export const BaseMap: React.FC<MapProps> = ({
 }: MapProps) => {
     const MAP_OVERLAY_ASSET = assetList.find(elem => elem.id == "MAP_OVERLAY_ASSET")
     const mapRef = useRef(null);
-    const [mapData, setMapData] = useState<ChannelType>(null);
     const [communities, setCommunities] = useState<ChannelType[]>(null);
     const [selectedCommunity, setSelectedCommunity] = useState<ChannelType>(null);
+    const [routes, setRoutes] = useState<ChannelType[]>(null);
+    const [routeStartPoints, setRouteStartPoints] = useState<ChannelContent[]>();
+    const [routePoints, setRoutePoints] = useState<ChannelType[]>(null);
     const [showMenu, setShowMenu] = useState(false);
+    /**
+     * useEffect Hooks
+     */
 
-
-    const handleCommunity = (community: ChannelType) => {
-        console.log(community)
-    }
     useEffect(() => {
         fetchData(channelId).then((data) => {
-            setMapData(data)
             setCommunities(data.children)
         })
     }, [])
 
+    /**
+     * Cascading useEffect hooks for separation of concerns.
+     * setSelectedCommunity TRIGGERS setRoutes TRIGGERS setRouteStartPoints
+     */
 
+    useEffect(() => {
+        if (selectedCommunity) {
+            panTo([selectedCommunity.long, selectedCommunity.lat], 8, mapRef);
+            setRoutes(selectedCommunity.children)
+        }
+    }, [selectedCommunity])
 
-
+    useEffect(() => {
+        if (routes) {
+            setRouteStartPoints(
+                routes.map((route: ChannelType) => route.contents.at(0))
+            )
+        }
+    }, [routes])
     return (<>
         <Box sx={{ backgroundImage: `url('${MAP_OVERLAY_ASSET?.url}')`, width: '100vw', height: '100vh', backgroundSize: "100vw 100vh", zIndex: 1 }}>
             <Map
@@ -67,7 +85,7 @@ export const BaseMap: React.FC<MapProps> = ({
                         <div className={'flex justify-start items-center gap-5'}>
                             <div onClick={() => { setShowMenu(!showMenu) }}> <MenuOutlined /> </div>
                         </div>
-                        {showMenu && <MapMenu selectCommunity={handleCommunity} communities={communities} />}
+                        {showMenu && <MapMenu selectCommunity={setSelectedCommunity} communities={communities} />}
                     </div>
                 </Box>
                 {hasInset && <InsetMap
@@ -83,27 +101,11 @@ export const BaseMap: React.FC<MapProps> = ({
                     zoomMinMax={insetMapProps!.zoomMinMax}
                 ></InsetMap>}
                 <div id="community">
-                    {communities && communities.length !== 0 && communities.map((community: ChannelType) => {
-                        console.log(community)
-                        return (<>
-                            <Box>
-                                <Marker
-                                    longitude={community.long}
-                                    latitude={community.lat}>
-                                    <p onClick={() => {
-                                        panTo([community.long, community.lat], 8, mapRef);
-                                        handleCommunity(community);
-                                        setSelectedCommunity(community);
-                                    }}> {(community.name)} </p>
-                                </Marker>
-                            </Box>);
-                        </>);
-                    })
+                    {renderCommunities(communities, setSelectedCommunity)}
+                </div>
 
-
-
-                    }
-
+                <div id="route-start-points">
+                    
 
                 </div>
 
