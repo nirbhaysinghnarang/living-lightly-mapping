@@ -11,7 +11,7 @@ export const panTo = (coords: [number, number], zoom: number, mapRef: React.RefO
                 center: coords, zoom: zoom,
                 speed: 5,
                 curve: 1,
-                easing(t:number) {
+                easing(t: number) {
                     return t;
                 }
             },
@@ -19,7 +19,7 @@ export const panTo = (coords: [number, number], zoom: number, mapRef: React.RefO
     }
 }
 
-export function renderCommunities(communities: ChannelType[], setSelectedCommunity:(community:ChannelType)=>void): ReactNode {
+export function renderCommunities(communities: ChannelType[], setSelectedCommunity: (community: ChannelType) => void): ReactNode {
     return (<>
         {communities && communities.length !== 0 && communities.map((community: ChannelType) => {
             return (<>
@@ -45,28 +45,31 @@ export function renderCommunities(communities: ChannelType[], setSelectedCommuni
 
 }
 
-export function renderRouteStartPoints(routeStartPoints: ChannelContent[], setSelectedRoute:(route:ChannelType)=>void, image:Asset):ReactNode{
+export function renderRouteStartPoints(routeStartPoints: ChannelContent[], setSelectedRoute: (routeStartPoint: ChannelContent) => void, image: Asset): ReactNode {
+    console.log(image)
     return (
         <>
-            {routeStartPoints && routeStartPoints.length!==0 && 
-            routeStartPoints.map((marker:ChannelContent) => {
-                return (
-                    <div className={"flex"}>
-                        <Marker
-                            longitude={marker.long}
-                            latitude={marker.lat}
-                            onClick={() => {
-                               
-                            }}
-                        >
-                            <div className={'cursor-pointer '}>
-                                <img
-                                    className={'shadow-2xl'}
-                                    src={image.url} alt={image.id} style={{ height: "40px" }}
-                                />
-                            </div>
-                        </Marker>
-                    </div>);
-            })}
+            {routeStartPoints && routeStartPoints.length !== 0 &&
+                routeStartPoints.map((marker: ChannelContent) => {
+                    return (
+                        <div className={"flex"}>
+                            <Marker
+                                longitude={marker.long}
+                                latitude={marker.lat}
+                                onClick={() => {
+
+                                }}
+                            >
+                                <div className={'cursor-pointer '}>
+                                    <img
+                                        className={'shadow-2xl'}
+                                        src={
+                                           image.url
+                                        } alt={image.id} style={{ height: "40px" }}
+                                    />
+                                </div>
+                            </Marker>
+                        </div>);
+                })}
         </>);
 }

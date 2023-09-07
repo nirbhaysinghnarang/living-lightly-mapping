@@ -10,8 +10,7 @@ import { ChannelContent, ChannelType } from "../../Types/Channel.types.ts";
 import { Menu as MapMenu } from "../menu.map.tsx";
 import { MenuOutlined } from "@mui/icons-material";
 import { panTo } from "./map.utils.tsx";
-import { renderCommunities } from "./map.utils.tsx";
-import { render } from "@testing-library/react";
+import { renderCommunities, renderRouteStartPoints } from "./map.utils.tsx";
 const _ = require('lodash');
 
 export const BaseMap: React.FC<MapProps> = ({
@@ -27,12 +26,23 @@ export const BaseMap: React.FC<MapProps> = ({
     hasInset
 }: MapProps) => {
     const MAP_OVERLAY_ASSET = assetList.find(elem => elem.id == "MAP_OVERLAY_ASSET")
+    const ROUTE_START_POINT_ASSET = assetList.find(elem => elem.id == "ROUTE_START_IMG")
     const mapRef = useRef(null);
+
+    /**
+     * useState hooks for data management
+     */
     const [communities, setCommunities] = useState<ChannelType[]>(null);
     const [selectedCommunity, setSelectedCommunity] = useState<ChannelType>(null);
     const [routes, setRoutes] = useState<ChannelType[]>(null);
     const [routeStartPoints, setRouteStartPoints] = useState<ChannelContent[]>();
     const [routePoints, setRoutePoints] = useState<ChannelType[]>(null);
+    const [selectedRoutePoint, setSelectedRoutePoint] = useState<ChannelContent>(null);
+
+
+    /**
+     * useState hooks for UI management
+     */
     const [showMenu, setShowMenu] = useState(false);
     /**
      * useEffect Hooks
@@ -101,11 +111,18 @@ export const BaseMap: React.FC<MapProps> = ({
                     zoomMinMax={insetMapProps!.zoomMinMax}
                 ></InsetMap>}
                 <div id="community">
-                    {renderCommunities(communities, setSelectedCommunity)}
+                    {renderCommunities(
+                        communities,
+                        setSelectedCommunity
+                    )}
                 </div>
 
                 <div id="route-start-points">
-                    
+                    {renderRouteStartPoints(
+                        routeStartPoints,
+                        setSelectedRoutePoint,
+                        ROUTE_START_POINT_ASSET
+                    )}
 
                 </div>
 
