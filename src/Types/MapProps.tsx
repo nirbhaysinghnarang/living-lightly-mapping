@@ -4,6 +4,7 @@ import { Nullable } from 'tsdef';
 
 export interface MapProps{
     assetList: Asset[],
+    channelId:Nullable<string>,
     mapZoom: number,
     mapCenter: LatLng,
     zoomMinMax: [number, number],

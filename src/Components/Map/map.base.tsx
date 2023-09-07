@@ -5,13 +5,15 @@ import { Box } from '@mui/material';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Marker, Map, MapProvider, Source, Layer, Popup } from 'react-map-gl';
 import { InsetMap } from "./map.inset.tsx";
+import { fetchData } from "./Functions/fetchData.tsx";
 export const BaseMap: React.FC<MapProps> = ({
     assetList,
     mapZoom,
+    channelId,
     mapCenter,
     zoomMinMax,
     mapBounds,
-    mapStyle, 
+    mapStyle,
     accessToken,
     insetMapProps,
     hasInset
@@ -19,6 +21,8 @@ export const BaseMap: React.FC<MapProps> = ({
     const MAP_OVERLAY_ASSET = assetList.find(elem => elem.id == "MAP_OVERLAY_ASSET")
     const mapRef = useRef(null);
     const [mapData, setMapData] = useState({});
+
+    fetchData(channelId)
     return (<>
         <Box sx={{ backgroundImage: `url('${MAP_OVERLAY_ASSET?.url}')`, width: '100vw', height: '100vh', backgroundSize: "100vw 100vh", zIndex: 1 }}>
             <Map
@@ -36,18 +40,20 @@ export const BaseMap: React.FC<MapProps> = ({
                 style={{ zIndex: 0, opacity: 0.5 }}
                 mapStyle={mapStyle}
                 mapboxAccessToken={accessToken}
-            >   
-            <InsetMap 
-                hasInset={false}
-                accessToken={insetMapProps!.accessToken} 
-                assetList={insetMapProps!.assetList}
-                mapZoom={insetMapProps!.mapZoom}
-                mapBounds={insetMapProps!.mapBounds}
-                mapCenter={insetMapProps!.mapCenter}
-                mapStyle={insetMapProps!.mapStyle}
-                insetMapProps={null}
-                zoomMinMax={insetMapProps!.zoomMinMax}
-            ></InsetMap>
+            >
+                {hasInset && <InsetMap
+                    channelId={insetMapProps!.channelId}
+                    hasInset={false}
+                    accessToken={insetMapProps!.accessToken}
+                    assetList={insetMapProps!.assetList}
+                    mapZoom={insetMapProps!.mapZoom}
+                    mapBounds={insetMapProps!.mapBounds}
+                    mapCenter={insetMapProps!.mapCenter}
+                    mapStyle={insetMapProps!.mapStyle}
+                    insetMapProps={null}
+                    zoomMinMax={insetMapProps!.zoomMinMax}
+                ></InsetMap>}
+
 
 
 

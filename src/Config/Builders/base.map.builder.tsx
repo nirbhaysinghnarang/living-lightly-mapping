@@ -5,6 +5,7 @@ import { BASE_MAP_ASSETS, BASE_MAP_BOUNDS, BASE_MAP_CENTER, BASE_MAP_HAS_INSET_M
 export function buildBaseMapProps(): MapProps {
     return {
         assetList:BASE_MAP_ASSETS,
+        channelId:ENV_VARS["CHANNEL_ID"]!,
         mapZoom: BASE_MAP_INIT_ZOOM,
         mapCenter: BASE_MAP_CENTER,
         zoomMinMax: BASE_MAP_ZOOM_MIN_MAX,
@@ -12,6 +13,7 @@ export function buildBaseMapProps(): MapProps {
         mapStyle: ENV_VARS["MAPBOX_STYLE"]!,
         hasInset:true,
         insetMapProps:{
+            channelId:null,
             hasInset:false,
             assetList:[],
             mapZoom:BASE_MAP_INIT_ZOOM,
