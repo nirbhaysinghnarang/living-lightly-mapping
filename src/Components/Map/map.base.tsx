@@ -9,9 +9,16 @@ import { fetchData } from "./Functions/fetchData.tsx";
 import { ChannelContent, ChannelType } from "../../Types/Channel.types.ts";
 import { Menu as MapMenu } from "../menu.map.tsx";
 import { MenuOutlined } from "@mui/icons-material";
-import { panTo } from "./map.utils.tsx";
+import { panTo, renderRoutePoints } from "./map.utils.tsx";
 import { renderCommunities, renderRouteStartPoints } from "./map.utils.tsx";
-const _ = require('lodash');
+import { createLineGeoJson } from "./Geometry/lineGeoJson.ts";
+import { createLayer } from "./Geometry/routeLayer.ts";
+
+
+
+//Map should only show one type of content at a time.
+type VIEWMODE = "Community" | "Routes" | "Route"
+
 
 export const BaseMap: React.FC<MapProps> = ({
     assetList,
@@ -27,6 +34,8 @@ export const BaseMap: React.FC<MapProps> = ({
 }: MapProps) => {
     const MAP_OVERLAY_ASSET = assetList.find(elem => elem.id == "MAP_OVERLAY_ASSET")
     const ROUTE_START_POINT_ASSET = assetList.find(elem => elem.id == "ROUTE_START_IMG")
+    const ROUTE_POINTER = assetList.find(elem => elem.id == "ROUTE_POINTER_IMG")
+
     const mapRef = useRef(null);
 
     /**
@@ -36,8 +45,12 @@ export const BaseMap: React.FC<MapProps> = ({
     const [selectedCommunity, setSelectedCommunity] = useState<ChannelType>(null);
     const [routes, setRoutes] = useState<ChannelType[]>(null);
     const [routeStartPoints, setRouteStartPoints] = useState<ChannelContent[]>();
-    const [routePoints, setRoutePoints] = useState<ChannelType[]>(null);
+    const [routePoints, setRoutePoints] = useState<ChannelContent[]>(null);
     const [selectedRoutePoint, setSelectedRoutePoint] = useState<ChannelContent>(null);
+    const [scopedMarker, setScopedMarker] = useState<ChannelContent>(null);
+
+
+    const [view, setView] = useState<VIEWMODE>("Community");
 
 
     /**
@@ -51,17 +64,20 @@ export const BaseMap: React.FC<MapProps> = ({
     useEffect(() => {
         fetchData(channelId).then((data) => {
             setCommunities(data.children)
+
         })
     }, [])
 
     /**
      * Cascading useEffect hooks for separation of concerns.
      * setSelectedCommunity TRIGGERS setRoutes TRIGGERS setRouteStartPoints
+     * 
      */
 
     useEffect(() => {
         if (selectedCommunity) {
             panTo([selectedCommunity.long, selectedCommunity.lat], 8, mapRef);
+            setView("Routes")
             setRoutes(selectedCommunity.children)
         }
     }, [selectedCommunity])
@@ -73,6 +89,26 @@ export const BaseMap: React.FC<MapProps> = ({
             )
         }
     }, [routes])
+
+    useEffect(()=>{
+        if(selectedRoutePoint){ 
+            setView("Route")
+            setRoutePoints(
+                routes.find((route:ChannelType) => route.contents.at(0) === selectedRoutePoint).contents
+            )
+        }
+    },[selectedRoutePoint])
+
+    useEffect(()=>{
+        if(routePoints){
+            setScopedMarker(routePoints.at(0));
+        }
+    },
+    [routePoints])
+
+
+
+   
     return (<>
         <Box sx={{ backgroundImage: `url('${MAP_OVERLAY_ASSET?.url}')`, width: '100vw', height: '100vh', backgroundSize: "100vw 100vh", zIndex: 1 }}>
             <Map
@@ -110,21 +146,33 @@ export const BaseMap: React.FC<MapProps> = ({
                     insetMapProps={null}
                     zoomMinMax={insetMapProps!.zoomMinMax}
                 ></InsetMap>}
-                <div id="community">
+
+                {view==="Community" && <div id="community">
                     {renderCommunities(
                         communities,
                         setSelectedCommunity
                     )}
-                </div>
+                </div>}
 
-                <div id="route-start-points">
+                {view==="Routes" && <div id="route-start-points">
                     {renderRouteStartPoints(
                         routeStartPoints,
                         setSelectedRoutePoint,
                         ROUTE_START_POINT_ASSET
                     )}
+                </div>}
 
-                </div>
+                {view==="Route" && scopedMarker &&routePoints && routePoints.length!==0 && <div id="route-points">
+                        {renderRoutePoints(
+                            routePoints,
+                            setScopedMarker,
+                            scopedMarker,
+                            ROUTE_POINTER
+                        )}
+                        <Source id="routes" type="geojson" data={createLineGeoJson(routePoints)}>
+                            {<Layer {...createLayer()}></Layer>}
+                        </Source>
+                </div>}
 
 
 

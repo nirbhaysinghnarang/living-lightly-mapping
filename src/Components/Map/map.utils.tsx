@@ -1,9 +1,10 @@
 import { Marker } from 'react-map-gl';
 import { Map } from "mapbox-gl";
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 import { Box } from "@mui/material";
 import { ChannelContent, ChannelType } from "../../Types/Channel.types";
 import { Asset } from '../../Types/Asset.type';
+import { createLineGeoJson } from './Geometry/lineGeoJson';
 export const panTo = (coords: [number, number], zoom: number, mapRef: React.RefObject<Map>) => {
     if (mapRef.current) {
         mapRef.current.flyTo(
@@ -54,18 +55,16 @@ export function renderRouteStartPoints(routeStartPoints: ChannelContent[], setSe
                     return (
                         <div className={"flex"}>
                             <Marker
+
                                 longitude={marker.long}
                                 latitude={marker.lat}
-                                onClick={() => {
-
-                                }}
+                                onClick={() => setSelectedRoute(marker)}
                             >
-                                <div className={'cursor-pointer '}>
+                                <div style={{ cursor: "pointer" }}>
                                     <img
-                                        className={'shadow-2xl'}
                                         src={
-                                           image.url
-                                        } alt={image.id} style={{ height: "40px" }}
+                                            image.url
+                                        } alt={image.id} style={{ height: "40px", boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', }}
                                     />
                                 </div>
                             </Marker>
@@ -73,3 +72,46 @@ export function renderRouteStartPoints(routeStartPoints: ChannelContent[], setSe
                 })}
         </>);
 }
+
+export function renderRoutePoints(routePoints: ChannelContent[], onClick: (marker: ChannelContent) => void, scopedMarker: ChannelContent, image: Asset): ReactNode {
+
+
+
+    return (
+        <>
+            {routePoints.map((marker: ChannelContent) => (
+                <div key={marker.id}>
+                    <Marker
+                        longitude={marker.long}
+                        latitude={marker.lat}
+                        onClick={() => onClick(marker)}
+                        style={{
+                            cursor: 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+
+                        }}
+
+                    >
+                        {(scopedMarker.lat === marker.lat && scopedMarker.long === marker.long) ? (
+                            <>
+                                <img src={image.url} style={{ margin: 'auto', width: '30px', height: '40px' }} /> {/* Apply native styles */}
+                                <p style={{ fontFamily: 'briem-font', color: '#894E35', fontSize: '18px' }}>{marker.title}</p> {/* Apply native styles */}
+                            </>
+                        ) : (
+                            <>
+                                <img src={image.url} style={{ margin: 'auto', width: '20px', height: '30px' }} /> {/* Apply native styles */}
+                                <p style={{ fontFamily: 'briem-font', color: '#894E35', fontSize: '18px' }}>{marker.title}</p>
+                            </>
+                        )}
+                    </Marker>
+                </div>
+            ))}
+                      
+
+
+            </>
+            );
+}
+

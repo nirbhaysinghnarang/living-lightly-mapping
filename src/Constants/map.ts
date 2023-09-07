@@ -5,7 +5,8 @@ import {CONSTANT_ASSETS} from './assets.ts'
 const BASE_MAP_ASSET_LIST: string[] = [
     "MAP_OVERLAY_ASSET",
     "INSET_MAP_OVERLAY_ASSET",
-    "ROUTE_START_IMG"
+    "ROUTE_START_IMG",
+    "ROUTE_POINTER_IMG"
 ] 
 
 const BASE_MAP_ASSETS = CONSTANT_ASSETS.filter(asset=>BASE_MAP_ASSET_LIST.includes(asset.id));
