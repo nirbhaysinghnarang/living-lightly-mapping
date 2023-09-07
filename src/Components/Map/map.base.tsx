@@ -6,6 +6,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { Marker, Map, MapProvider, Source, Layer, Popup } from 'react-map-gl';
 import { InsetMap } from "./map.inset.tsx";
 import { fetchData } from "./Functions/fetchData.tsx";
+import { ChannelType } from "../../Types/Channel.types.ts";
 export const BaseMap: React.FC<MapProps> = ({
     assetList,
     mapZoom,
@@ -21,8 +22,9 @@ export const BaseMap: React.FC<MapProps> = ({
     const MAP_OVERLAY_ASSET = assetList.find(elem => elem.id == "MAP_OVERLAY_ASSET")
     const mapRef = useRef(null);
     const [mapData, setMapData] = useState({});
-
-    fetchData(channelId)
+    fetchData(channelId).then((data:ChannelType)=>{
+        console.log(data)
+    })
     return (<>
         <Box sx={{ backgroundImage: `url('${MAP_OVERLAY_ASSET?.url}')`, width: '100vw', height: '100vh', backgroundSize: "100vw 100vh", zIndex: 1 }}>
             <Map

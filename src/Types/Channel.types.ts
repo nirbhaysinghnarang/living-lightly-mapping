@@ -5,42 +5,33 @@ import { Nullable } from 'tsdef';
 
 /**
  * This type represents an editor.
+ * Required field: id
  */
-export interface ChannelEditor {
-    id:string;
-    username:Nullable<string>;
-    email:Nullable<string>;
+export type ChannelEditor ={
+    id:string,
+    username:Nullable<string>,
+    email:Nullable<string>
 }
 /**
  * This type represents a base channel
  * which has children of type [ChannelType]
  */
-export type BaseChannelType = {
+export type ChannelType = {
     editors: ChannelEditor[],
     description: string,
     lat: number,
     long: number,
     markercolor:string,
+    createdAt:string,
+    updatedAt:string,
+    children: Nullable<ChannelType[]>
+    contents: Nullable<ChannelContent[]>
     name:string,
     order: Nullable<number>,
     uniqueID:string,
-    children: Nullable<ChannelType[]>,
+    tileset:Nullable<Tileset>
 }
 
-/**
- * This is the main recursive data type to handle channels and subchannels
- */
-export type ChannelType = {
-    id:number,
-    lat:Nullable<number>,
-    long:Nullable<number>,
-    order: Nullable<number>,
-    owner: ChannelEditor,
-    uniqueID:string,
-    public:Nullable<boolean>,
-    subchannels: Nullable<ChannelType>
-    channelContent: Nullable<ChannelContent[]>
-}
 
 /**
  * This is the base level content for each channel. 
@@ -52,5 +43,19 @@ export type ChannelContent = {
     id:number,
     lat: number,
     long: number,
-    title: Nullable<String>
+    title: Nullable<String>,
+    mediafile:Nullable<MediaFile>
+}
+
+type MediaFile = {
+    caption: Nullable<String>,
+    url:String
+
+}
+
+type Tileset = {
+    id:number,
+    attribution:Nullable<string>,
+    name:Nullable<string>,
+    url:string
 }
