@@ -31,8 +31,6 @@ export async function fetchData(channelId:string): Promise<ChannelType>{
     async function recurse(channelId:string, channel:ChannelType):Promise<ChannelType>{
         return getChannel(channelId).then((channelResponse:AxiosResponse<ChannelType>)=>{
             const data:ChannelType = channelResponse.data
-
-
             channel.editors = data.editors
             channel.description = data.description
             channel.createdAt = data.createdAt
@@ -43,6 +41,7 @@ export async function fetchData(channelId:string): Promise<ChannelType>{
             channel.uniqueID = data.uniqueID
             channel.children = []
             channel.order = data.order
+            channel.name = data.name
             channel.contents = []
 
             if(data.contents.length !==0){

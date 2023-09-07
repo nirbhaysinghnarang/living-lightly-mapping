@@ -6,7 +6,9 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { Marker, Map, MapProvider, Source, Layer, Popup } from 'react-map-gl';
 import { InsetMap } from "./map.inset.tsx";
 import { fetchData } from "./Functions/fetchData.tsx";
-import { ChannelType } from "../../Types/Channel.types.ts";
+import { ChannelContent, ChannelType } from "../../Types/Channel.types.ts";
+import { Menu as MapMenu } from "../menu.map.tsx";
+import { MenuOutlined } from "@mui/icons-material";
 export const BaseMap: React.FC<MapProps> = ({
     assetList,
     mapZoom,
@@ -21,10 +23,30 @@ export const BaseMap: React.FC<MapProps> = ({
 }: MapProps) => {
     const MAP_OVERLAY_ASSET = assetList.find(elem => elem.id == "MAP_OVERLAY_ASSET")
     const mapRef = useRef(null);
-    const [mapData, setMapData] = useState({});
-    fetchData(channelId).then((data:ChannelType)=>{
-        console.log(data)
-    })
+    const [mapData, setMapData] = useState<ChannelType>(null);
+    const [communities, setCommunities] = useState<ChannelType[]>([]);
+    const [selectedCommunity, setSelectedCommunity] = useState<ChannelType>(null);
+    const [showMenu, setShowMenu] = useState(false);
+
+
+    const handleCommunity = (community:ChannelType) => {
+        setSelectedCommunity(
+            communities.find((comm:ChannelType)=>comm.uniqueID === community.uniqueID)
+        );
+    }
+    useEffect(()=>{
+        fetchData(channelId).then((data:ChannelType)=>setMapData(data))
+    },[])
+
+    useEffect(()=>{
+        if(mapData!==null && Object.keys(mapData).length!==0){
+            setCommunities(mapData.children)
+        }
+    },[mapData])
+
+
+
+    
     return (<>
         <Box sx={{ backgroundImage: `url('${MAP_OVERLAY_ASSET?.url}')`, width: '100vw', height: '100vh', backgroundSize: "100vw 100vh", zIndex: 1 }}>
             <Map
@@ -37,12 +59,19 @@ export const BaseMap: React.FC<MapProps> = ({
                 maxZoom={zoomMinMax[1]}
                 minZoom={zoomMinMax[0]}
                 id="primary_map"
-                // maxBounds={mapBounds}
                 ref={mapRef}
                 style={{ zIndex: 0, opacity: 0.5 }}
                 mapStyle={mapStyle}
                 mapboxAccessToken={accessToken}
             >
+                <Box sx={{ position: 'absolute', top: "50px", left: "80px", zIndex: 10 }}>
+                        <div>
+                            <div className={'flex justify-start items-center gap-5'}>
+                                <div onClick={() => { setShowMenu(!showMenu) }}> <MenuOutlined /> </div>
+                            </div>
+                            {showMenu && <MapMenu selectCommunity={handleCommunity} communities={communities} />}
+                        </div>
+                    </Box>
                 {hasInset && <InsetMap
                     channelId={insetMapProps!.channelId}
                     hasInset={false}

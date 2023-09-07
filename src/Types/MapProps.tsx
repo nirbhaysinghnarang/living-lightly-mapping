@@ -13,6 +13,4 @@ export interface MapProps{
     accessToken: string,
     insetMapProps: Nullable<MapProps>,
     hasInset: boolean
-
-
 }
