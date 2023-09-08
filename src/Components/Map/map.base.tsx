@@ -5,7 +5,7 @@ import { Box } from '@mui/material';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Marker, Map, MapProvider, Source, Layer, Popup } from 'react-map-gl';
 import { InsetMap } from "./map.inset.tsx";
-import { fetchData } from "./Functions/fetchData.tsx";
+import { fetchData } from "./Functions/fetchData.ts";
 import { ChannelContent, ChannelType } from "../../Types/Channel.types.ts";
 import { Menu as MapMenu } from "../menu.map.tsx";
 import { MenuOutlined } from "@mui/icons-material";
@@ -13,6 +13,8 @@ import { panTo, renderRoutePoints } from "./map.utils.tsx";
 import { renderCommunities, renderRouteStartPoints } from "./map.utils.tsx";
 import { createLineGeoJson } from "./Geometry/lineGeoJson.ts";
 import { createLayer } from "./Geometry/routeLayer.ts";
+import { Cycle } from "./map.cycle.tsx";
+import { cycle } from "./Functions/cycle.ts";
 
 
 
@@ -32,9 +34,15 @@ export const BaseMap: React.FC<MapProps> = ({
     insetMapProps,
     hasInset
 }: MapProps) => {
+
+
+
     const MAP_OVERLAY_ASSET = assetList.find(elem => elem.id == "MAP_OVERLAY_ASSET")
     const ROUTE_START_POINT_ASSET = assetList.find(elem => elem.id == "ROUTE_START_IMG")
     const ROUTE_POINTER = assetList.find(elem => elem.id == "ROUTE_POINTER_IMG")
+    const ARROW_PREV = assetList.find(elem=>elem.id==="ARROW_PREV_IMG")
+    const ARROW_NEXT = assetList.find(elem=>elem.id==="ARROW_NEXT_IMG")
+
 
     const mapRef = useRef(null);
 
@@ -108,6 +116,8 @@ export const BaseMap: React.FC<MapProps> = ({
 
 
 
+
+
    
     return (<>
         <Box sx={{ backgroundImage: `url('${MAP_OVERLAY_ASSET?.url}')`, width: '100vw', height: '100vh', backgroundSize: "100vw 100vh", zIndex: 1 }}>
@@ -172,6 +182,12 @@ export const BaseMap: React.FC<MapProps> = ({
                         <Source id="routes" type="geojson" data={createLineGeoJson(routePoints)}>
                             {<Layer {...createLayer()}></Layer>}
                         </Source>
+                        <Cycle 
+                            arrowPrevImage={ARROW_PREV}
+                            arrowNextImage={ARROW_NEXT}
+                            onNextArrowClick={()=>{setScopedMarker(cycle(scopedMarker, routePoints, "UP"))}}
+                            onPrevArrowClick={()=>{setScopedMarker(cycle(scopedMarker, routePoints, "DOWN"))}}
+                        />
                 </div>}
 
 
