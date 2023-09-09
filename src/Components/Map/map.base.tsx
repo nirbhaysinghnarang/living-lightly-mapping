@@ -1,6 +1,5 @@
 import { MapProps } from "../../Types/MapProps";
 import React, { useRef, useEffect, useState, createRef, Children } from 'react';
-import * as mapboxgl from 'mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
 import { Box } from '@mui/material';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Marker, Map, MapProvider, Source, Layer, Popup } from 'react-map-gl';
@@ -15,7 +14,7 @@ import { createLineGeoJson } from "./Geometry/lineGeoJson.ts";
 import { createLayer } from "./Geometry/routeLayer.ts";
 import { Cycle } from "./map.cycle.tsx";
 import { cycle } from "./Functions/cycle.ts";
-
+import { createPolygonLayer, getStatesJson } from "./Geometry/drawStates.ts";
 
 
 //Map should only show one type of content at a time.
@@ -40,8 +39,8 @@ export const BaseMap: React.FC<MapProps> = ({
     const MAP_OVERLAY_ASSET = assetList.find(elem => elem.id == "MAP_OVERLAY_ASSET")
     const ROUTE_START_POINT_ASSET = assetList.find(elem => elem.id == "ROUTE_START_IMG")
     const ROUTE_POINTER = assetList.find(elem => elem.id == "ROUTE_POINTER_IMG")
-    const ARROW_PREV = assetList.find(elem=>elem.id==="ARROW_PREV_IMG")
-    const ARROW_NEXT = assetList.find(elem=>elem.id==="ARROW_NEXT_IMG")
+    const ARROW_PREV = assetList.find(elem => elem.id === "ARROW_PREV_IMG")
+    const ARROW_NEXT = assetList.find(elem => elem.id === "ARROW_NEXT_IMG")
 
 
     const mapRef = useRef(null);
@@ -98,27 +97,27 @@ export const BaseMap: React.FC<MapProps> = ({
         }
     }, [routes])
 
-    useEffect(()=>{
-        if(selectedRoutePoint){ 
+    useEffect(() => {
+        if (selectedRoutePoint) {
             setView("Route")
             setRoutePoints(
-                routes.find((route:ChannelType) => route.contents.at(0) === selectedRoutePoint).contents
+                routes.find((route: ChannelType) => route.contents.at(0) === selectedRoutePoint).contents
             )
         }
-    },[selectedRoutePoint])
+    }, [selectedRoutePoint])
 
-    useEffect(()=>{
-        if(routePoints){
+    useEffect(() => {
+        if (routePoints) {
             setScopedMarker(routePoints.at(0));
         }
     },
-    [routePoints])
+        [routePoints])
 
 
 
 
 
-   
+
     return (<>
         <Box sx={{ backgroundImage: `url('${MAP_OVERLAY_ASSET?.url}')`, width: '100vw', height: '100vh', backgroundSize: "100vw 100vh", zIndex: 1 }}>
             <Map
@@ -157,14 +156,20 @@ export const BaseMap: React.FC<MapProps> = ({
                     zoomMinMax={insetMapProps!.zoomMinMax}
                 ></InsetMap>}
 
-                {view==="Community" && <div id="community">
+                {view === "Community" && <div id="community">
                     {renderCommunities(
                         communities,
                         setSelectedCommunity
                     )}
+                    {communities && getStatesJson(communities).map((data: any) => 
+                    {
+                        return <Source id={"state"} type="geojson" data={data} >
+                            <Layer {...createPolygonLayer()} />
+                        </Source>
+                    })}
                 </div>}
 
-                {view==="Routes" && <div id="route-start-points">
+                {view === "Routes" && <div id="route-start-points">
                     {renderRouteStartPoints(
                         routeStartPoints,
                         setSelectedRoutePoint,
@@ -172,23 +177,25 @@ export const BaseMap: React.FC<MapProps> = ({
                     )}
                 </div>}
 
-                {view==="Route" && scopedMarker &&routePoints && routePoints.length!==0 && <div id="route-points">
-                        {renderRoutePoints(
-                            routePoints,
-                            setScopedMarker,
-                            scopedMarker,
-                            ROUTE_POINTER
-                        )}
-                        <Source id="routes" type="geojson" data={createLineGeoJson(routePoints)}>
-                            {<Layer {...createLayer()}></Layer>}
-                        </Source>
-                        <Cycle 
-                            arrowPrevImage={ARROW_PREV}
-                            arrowNextImage={ARROW_NEXT}
-                            onNextArrowClick={()=>{setScopedMarker(cycle(scopedMarker, routePoints, "UP"))}}
-                            onPrevArrowClick={()=>{setScopedMarker(cycle(scopedMarker, routePoints, "DOWN"))}}
-                        />
+                {view === "Route" && scopedMarker && routePoints && routePoints.length !== 0 && <div id="route-points">
+                    {renderRoutePoints(
+                        routePoints,
+                        setScopedMarker,
+                        scopedMarker,
+                        ROUTE_POINTER
+                    )}
+                    <Source id="routes" type="geojson" data={createLineGeoJson(routePoints)}>
+                        {<Layer {...createLayer()}></Layer>}
+                    </Source>
+                    <Cycle
+                        arrowPrevImage={ARROW_PREV}
+                        arrowNextImage={ARROW_NEXT}
+                        onNextArrowClick={() => { setScopedMarker(cycle(scopedMarker, routePoints, "UP")) }}
+                        onPrevArrowClick={() => { setScopedMarker(cycle(scopedMarker, routePoints, "DOWN")) }}
+                    />
                 </div>}
+
+
 
 
 
