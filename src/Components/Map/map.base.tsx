@@ -7,7 +7,7 @@ import { Marker, Map, MapProvider, Source, Layer, Popup } from 'react-map-gl';
 import { InsetMap } from "./map.inset.tsx";
 import { fetchData } from "./Functions/fetchData.ts";
 import { ChannelContent, ChannelType } from "../../Types/Channel.types.ts";
-import { Menu as MapMenu } from "../menu.map.tsx";
+import { Menu as MapMenu } from "../map.menu.tsx";
 import { MenuOutlined } from "@mui/icons-material";
 import { panTo, renderRoutePoints } from "./map.utils.tsx";
 import { renderCommunities, renderRouteStartPoints } from "./map.utils.tsx";
@@ -72,7 +72,6 @@ export const BaseMap: React.FC<MapProps> = ({
     useEffect(() => {
         fetchData(channelId).then((data) => {
             setCommunities(data.children)
-
         })
     }, [])
 
@@ -84,6 +83,7 @@ export const BaseMap: React.FC<MapProps> = ({
 
     useEffect(() => {
         if (selectedCommunity) {
+            setShowMenu(false); //in case
             panTo([selectedCommunity.long, selectedCommunity.lat], 8, mapRef);
             setView("Routes")
             setRoutes(selectedCommunity.children)

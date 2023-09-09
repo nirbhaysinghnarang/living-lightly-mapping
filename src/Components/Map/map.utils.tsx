@@ -1,7 +1,7 @@
 import { Marker } from 'react-map-gl';
 import { Map } from "mapbox-gl";
 import React, { ReactNode } from "react";
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { ChannelContent, ChannelType } from "../../Types/Channel.types";
 import { Asset } from '../../Types/Asset.type';
 import { createLineGeoJson } from './Geometry/lineGeoJson';
@@ -32,7 +32,7 @@ export function renderCommunities(communities: ChannelType[], setSelectedCommuni
 
                             setSelectedCommunity(community);
 
-                        }}> {(community.name)} </p>
+                        }}> <Typography variant='h5' fontFamily={'BriemScript'}>{(community.name)}</Typography> </p>
                     </Marker>
                 </Box>);
             </>);
@@ -90,19 +90,17 @@ export function renderRoutePoints(routePoints: ChannelContent[], onClick: (marke
                             display: 'flex',
                             flexDirection: 'column',
                             justifyContent: 'center',
-
                         }}
-
                     >
                         {(scopedMarker.lat === marker.lat && scopedMarker.long === marker.long) ? (
                             <>
                                 <img src={image.url} style={{ margin: 'auto', width: '30px', height: '40px' }} /> {/* Apply native styles */}
-                                <p style={{ fontFamily: 'briem-font', color: '#894E35', fontSize: '18px' }}>{marker.title}</p> {/* Apply native styles */}
+                                <p style={{ fontFamily: 'BriemScript', color: '#894E35', fontSize: '20px', fontWeight:700 }}>{marker.title}</p> {/* Apply native styles */}
                             </>
                         ) : (
                             <>
                                 <img src={image.url} style={{ margin: 'auto', width: '20px', height: '30px' }} /> {/* Apply native styles */}
-                                <p style={{ fontFamily: 'briem-font', color: '#894E35', fontSize: '18px' }}>{marker.title}</p>
+                                <p style={{ fontFamily: 'BriemScript', color: '#894E35', fontSize: '18px' }}>{marker.title}</p>
                             </>
                         )}
                     </Marker>

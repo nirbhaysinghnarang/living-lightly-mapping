@@ -13,7 +13,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
         display: 'flex',
         fontSize: '20px',
         paddingTop: '3px',
-        fontFamily: 'briem-font',
+        fontFamily: 'BriemScript',
     },
     paper: {
         border: '2px dashed black',
@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
         borderRadius: '16px',
         maxHeight:100,
         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-        fontFamily: 'briem-font',
+        fontFamily: 'BriemScript',
     },
     button: {
         display: 'flex',
@@ -34,9 +34,8 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
         padding: '10px',
         borderRadius: '16px',
         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-        fontFamily: 'briem-font',
+        fontFamily: 'BriemScript',
         border: '2px dashed black',
-
     },
     menuItem: {
         padding: '10px',
@@ -45,7 +44,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
     },
     hr: {
         border: '3px solid white',
-        fontFamily: 'briem-font',
+        fontFamily: 'BriemScript',
     },
     mx3:{
         margin:3,
@@ -82,7 +81,7 @@ export const Menu: React.FC<MenuProps> = ({ communities, selectCommunity }: Menu
                         className={classes.button}
                     >
                         <Stack direction="row" justifyContent={"space-between"} alignItems={"center"} sx={{color:"black"}}>
-                            <Typography className={classes.menuItem}>Communities</Typography>
+                            <Typography className={classes.menuItem} sx={{fontFamily:'BriemScript'}} >Communities</Typography>
                             <ArrowIcon />
                         </Stack>
                     </Button>
@@ -96,7 +95,7 @@ export const Menu: React.FC<MenuProps> = ({ communities, selectCommunity }: Menu
                         className={classes.button}
                     >
                         <Stack direction="row" justifyContent={"space-between"} alignItems={"center"} sx={{color:"black"}}>
-                            <Typography className={classes.menuItem}>Themes</Typography>
+                            <Typography className={classes.menuItem} sx={{fontFamily:'BriemScript'}}>Themes</Typography>
                             <ArrowIcon />
                         </Stack>
                     </Button>
@@ -114,7 +113,7 @@ export const Menu: React.FC<MenuProps> = ({ communities, selectCommunity }: Menu
                                 className={classes.menuItem}
                                 onClick={() => selectCommunity(community)}
                             >
-                                <Typography style={{ textTransform: 'capitalize' }}>
+                                <Typography  style={{ textTransform: 'capitalize', fontFamily:'BriemScript' }}>
                                     {returnTitle(community)}
                                 </Typography>
                             </div>
