@@ -1,8 +1,8 @@
 import { MapProps } from "../../Types/MapProps";
-import React, { useRef, useEffect, useState, createRef, Children } from 'react';
-import { Box } from '@mui/material';
+import React, { useRef, useEffect, useState } from 'react';
+import { Box, Button, Typography } from '@mui/material';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { Marker, Map, MapProvider, Source, Layer, Popup } from 'react-map-gl';
+import { Map, Source, Layer } from 'react-map-gl';
 import { InsetMap } from "./map.inset.tsx";
 import { fetchData } from "./Functions/fetchData.ts";
 import { ChannelContent, ChannelType } from "../../Types/Channel.types.ts";
@@ -14,13 +14,14 @@ import { createLineGeoJson } from "./Geometry/lineGeoJson.ts";
 import { createLayer } from "./Geometry/routeLayer.ts";
 import { Cycle } from "./map.cycle.tsx";
 import { cycle } from "./Functions/cycle.ts";
-import { createPolygonLayer, getStatesJson } from "./Geometry/drawStates.ts";
+import { createPolygonLayer } from "./Geometry/drawStates.ts";
 import { State, constructStates } from "../../Types/State.type.ts";
 import { getZoomLevel } from "./Geometry/getZoomLevel.ts";
 import { handleClickStateLevel } from "./Events/handleClick.ts";
-
-//Map should only show one type of content at a time.
-export type VIEWMODE = "State" | "Community" | "Routes" | "Route"
+import { HistoryStack, HistoryStackElement, append, peek, selectedElementString, pop, initialStackElement } from "../../Types/History.stack.type.ts";
+import { getType } from "../../Types/TypeChecks.ts";
+import { VIEWMODE } from "../../Types/ViewMode.type.ts";
+import { stack } from "d3";
 
 
 export const BaseMap: React.FC<MapProps> = ({
@@ -52,10 +53,12 @@ export const BaseMap: React.FC<MapProps> = ({
     const [selectedRoutePoint, setSelectedRoutePoint] = useState<ChannelContent>(null);
     const [scopedMarker, setScopedMarker] = useState<ChannelContent>(null);
     const [states, setStates] = useState<State[]>([]);
-
     const [selectedState, setSelectedState] = useState<State | null>(null);
-
     const [view, setView] = useState<VIEWMODE>("State");
+
+    const [historyStack, setHistoryStack] = useState<HistoryStack>([
+        initialStackElement
+    ]);
 
     /**
      * useState hooks for UI management
@@ -67,24 +70,39 @@ export const BaseMap: React.FC<MapProps> = ({
      * useEffect Hooks
      */
 
+    //This useEffect hook will automagically set zoom level and proper coordinates based on the last element on the stack.
     useEffect(() => {
-        const zoomLevel = getZoomLevel(view)
-        let jumpDestination: [number, number]
-        switch (view) {
-            case "State":
-                jumpDestination = [mapCenter.lng, mapCenter.lat]
-                break
-            case "Community":
-                jumpDestination = selectedState.center.geometry.coordinates as [number, number]
-                break
-            case "Routes":
-                jumpDestination = [selectedCommunity.long, selectedCommunity.lat]
-                break;
-            case "Route":
-                jumpDestination = [selectedRoutePoint.long, selectedRoutePoint.lat]
+
+      
+        if (historyStack && historyStack.length>1) {
+
+            const stackTop = peek(historyStack)
+
+            const zoomLevel = getZoomLevel(stackTop.view)
+            setView(stackTop.view)
+            const typeOfTop: selectedElementString = getType(stackTop.selectedElement)
+            let jumpDestination: [number, number]
+            switch (typeOfTop) {
+                case "State":
+                    const stateElt = stackTop.selectedElement as State
+                    jumpDestination = stateElt.center.geometry.coordinates as [number, number]
+                    break
+                case "ChannelType":
+                    const typeElt = stackTop.selectedElement as ChannelType
+                    jumpDestination = [typeElt.long, typeElt.lat]
+                    break
+                case "ChannelContent":
+                    const contentElt = stackTop.selectedElement as ChannelContent
+                    jumpDestination = [contentElt.long, contentElt.lat]
+                    break
+            }
+            panTo(jumpDestination, zoomLevel, mapRef)
+        } else {
+            panTo([mapCenter.lng, mapCenter.lat], getZoomLevel("State"), mapRef)
+            setView("State")
         }
-        panTo(jumpDestination, zoomLevel, mapRef)
-    }, [view])
+
+    }, [historyStack])
 
     useEffect(() => {
         fetchData(channelId).then((data) => {
@@ -93,6 +111,8 @@ export const BaseMap: React.FC<MapProps> = ({
         })
     }, [])
 
+    useEffect(()=>{console.log(view)}, [view])
+
     useEffect(() => {
         if (communities) setStates(constructStates(communities))
     }, [communities])
@@ -100,8 +120,15 @@ export const BaseMap: React.FC<MapProps> = ({
     useEffect(() => {
         if (selectedCommunity) {
             setShowMenu(false); //in case
-            setView("Routes")
             setRoutes(selectedCommunity.children)
+            setHistoryStack((prevStack: HistoryStack) => {
+                return append([...prevStack],
+                    {
+                        view: "Routes",
+                        selectedElement: selectedCommunity
+                    }
+                )
+            })
         }
     }, [selectedCommunity])
 
@@ -115,10 +142,17 @@ export const BaseMap: React.FC<MapProps> = ({
 
     useEffect(() => {
         if (selectedRoutePoint) {
-            setView("Route")
             setRoutePoints(
                 routes.find((route: ChannelType) => route.contents.at(0) === selectedRoutePoint).contents
             )
+            setHistoryStack((prevStack: HistoryStack) => {
+                return append([...prevStack],
+                    {
+                        view: "Route",
+                        selectedElement: selectedRoutePoint
+                    }
+                )
+            })
         }
     }, [selectedRoutePoint])
 
@@ -129,8 +163,8 @@ export const BaseMap: React.FC<MapProps> = ({
     },
         [routePoints])
 
-    useEffect(()=>{
-        if(scopedMarker){
+    useEffect(() => {
+        if (scopedMarker) {
             panTo(
                 [scopedMarker.long, scopedMarker.lat],
                 getZoomLevel("Route"),
@@ -163,6 +197,15 @@ export const BaseMap: React.FC<MapProps> = ({
                             setView("Community")
                             setSelectedState(resultOfClick)
                             setCommunities(resultOfClick.communities)
+                            //this is where we add the first element to the history stack because
+                            //this is where user interaction actually begins.
+                            const stackTop: HistoryStackElement = {
+                                view: "Community",
+                                selectedElement: resultOfClick
+                            }
+                            setHistoryStack((prevStack: HistoryStack) => {
+                                return append([...prevStack], stackTop)
+                            })
                         }
                     }
 
@@ -230,6 +273,26 @@ export const BaseMap: React.FC<MapProps> = ({
                         }}
                     />
                 </div>}
+
+                {
+                    historyStack && historyStack.length > 1 && 
+                    <Button sx={{
+                    position:"absolute",
+                    top: "50px", 
+                    right: "80px", 
+                    zIndex: 10,
+                    color:"black"
+                }}onClick={() => {
+                    setHistoryStack((prev: HistoryStack) => {
+                        return pop([...prev])
+                    })
+
+                }}> 
+                    <Typography variant="body1" sx={{fontFamily:"BriemScript", fontWeight:800}}>Back</Typography>
+                
+                 </Button>
+                
+                }
 
 
 

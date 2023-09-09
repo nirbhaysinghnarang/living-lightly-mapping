@@ -46,7 +46,6 @@ export function renderCommunities(communities: ChannelType[], setSelectedCommuni
 }
 
 export function renderRouteStartPoints(routeStartPoints: ChannelContent[], setSelectedRoute: (routeStartPoint: ChannelContent) => void, image: Asset): ReactNode {
-    console.log(image)
     return (
         <>
             {routeStartPoints && routeStartPoints.length !== 0 &&

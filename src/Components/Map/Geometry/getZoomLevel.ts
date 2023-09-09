@@ -1,5 +1,4 @@
-import { VIEWMODE } from "../map.base";
-
+import { VIEWMODE } from "../../../Types/ViewMode.type"
 export function getZoomLevel(view:VIEWMODE){
     switch (view){
         case "State":
