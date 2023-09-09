@@ -4,7 +4,7 @@ import { Box, Button, Typography } from '@mui/material';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Map, Source, Layer } from 'react-map-gl';
 import { InsetMap } from "./map.inset.tsx";
-import { fetchData } from "./Functions/fetchData.ts";
+import { extractNestedIds, fetchData, getOverlays } from "./Functions/fetchData.ts";
 import { ChannelContent, ChannelType } from "../../Types/Channel.types.ts";
 import { Menu as MapMenu } from "../map.menu.tsx";
 import { MenuOutlined } from "@mui/icons-material";
@@ -22,6 +22,7 @@ import { HistoryStack, HistoryStackElement, append, peek, selectedElementString,
 import { getType } from "../../Types/TypeChecks.ts";
 import { VIEWMODE } from "../../Types/ViewMode.type.ts";
 import { stack } from "d3";
+import { CommunityPopup } from "./Popups/community.popup.tsx";
 
 
 export const BaseMap: React.FC<MapProps> = ({
@@ -55,6 +56,7 @@ export const BaseMap: React.FC<MapProps> = ({
     const [states, setStates] = useState<State[]>([]);
     const [selectedState, setSelectedState] = useState<State | null>(null);
     const [view, setView] = useState<VIEWMODE>("State");
+    const [hoverCommunity, setHoverCommunity] = useState<ChannelType>(null)
 
     const [historyStack, setHistoryStack] = useState<HistoryStack>([
         initialStackElement
@@ -66,6 +68,8 @@ export const BaseMap: React.FC<MapProps> = ({
     const [showMenu, setShowMenu] = useState(false);
     const [zoom, setZoom] = useState(getZoomLevel(view))
 
+    useEffect(()=>{console.log(hoverCommunity)},[hoverCommunity])
+
     /**
      * useEffect Hooks
      */
@@ -75,9 +79,7 @@ export const BaseMap: React.FC<MapProps> = ({
 
       
         if (historyStack && historyStack.length>1) {
-
             const stackTop = peek(historyStack)
-
             const zoomLevel = getZoomLevel(stackTop.view)
             setView(stackTop.view)
             const typeOfTop: selectedElementString = getType(stackTop.selectedElement)
@@ -106,12 +108,12 @@ export const BaseMap: React.FC<MapProps> = ({
 
     useEffect(() => {
         fetchData(channelId).then((data) => {
+            
             setCommunities(data.children)
             setZoom(getZoomLevel(view));
         })
     }, [])
 
-    useEffect(()=>{console.log(view)}, [view])
 
     useEffect(() => {
         if (communities) setStates(constructStates(communities))
@@ -234,8 +236,11 @@ export const BaseMap: React.FC<MapProps> = ({
                 {view === "Community" && <div id="community">
                     {renderCommunities(
                         communities,
-                        setSelectedCommunity
+                        setSelectedCommunity,
+                        setHoverCommunity
                     )}
+                    {hoverCommunity && <CommunityPopup community={hoverCommunity} fixed={false}></CommunityPopup>
+                    }
 
                 </div>}
 
@@ -250,6 +255,7 @@ export const BaseMap: React.FC<MapProps> = ({
                         setSelectedRoutePoint,
                         ROUTE_START_POINT_ASSET
                     )}
+                    {selectedCommunity && <CommunityPopup community={selectedCommunity} fixed={true}></CommunityPopup>}
                 </div>}
 
                 {view === "Route" && scopedMarker && routePoints && routePoints.length !== 0 && <div id="route-points">

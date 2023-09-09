@@ -24,10 +24,4 @@ export function handleClickStateLevel(position: LngLat, mapRef: React.RefObject<
         )
         return state
     }
-
-
-
-
-
-
 }

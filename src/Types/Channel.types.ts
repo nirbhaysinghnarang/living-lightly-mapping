@@ -30,6 +30,12 @@ export type ChannelType = {
     order: Nullable<number>,
     uniqueID:string,
     tileset:Nullable<Tileset>
+    picture:Nullable<{
+        formats:Nullable<any>,
+        id:number,
+        size:number,
+        url:string
+    }>
 }
 
 

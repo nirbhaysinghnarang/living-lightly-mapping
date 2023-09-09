@@ -7,7 +7,6 @@ export const InsetMap: React.FC<MapProps> = ({
     assetList,
     mapZoom,
     mapCenter,
-    zoomMinMax,
     mapBounds,
     mapStyle,
     accessToken,

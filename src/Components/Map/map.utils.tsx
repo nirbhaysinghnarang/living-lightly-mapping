@@ -5,6 +5,7 @@ import { Box, Typography } from "@mui/material";
 import { ChannelContent, ChannelType } from "../../Types/Channel.types";
 import { Asset } from '../../Types/Asset.type';
 import { createLineGeoJson } from './Geometry/lineGeoJson';
+import { CommunityPopup } from './Popups/community.popup';
 export const panTo = (coords: [number, number], zoom: number, mapRef: React.RefObject<Map>) => {
     if (mapRef.current) {
         mapRef.current.flyTo(
@@ -20,7 +21,7 @@ export const panTo = (coords: [number, number], zoom: number, mapRef: React.RefO
     }
 }
 
-export function renderCommunities(communities: ChannelType[], setSelectedCommunity: (community: ChannelType) => void): ReactNode {
+export function renderCommunities(communities: ChannelType[], setSelectedCommunity: (community: ChannelType) => void, setHoverCommunity:(community:ChannelType)=>void): ReactNode {
     return (<>
         {communities && communities.length !== 0 && communities.map((community: ChannelType) => {
             return (<>
@@ -30,8 +31,10 @@ export function renderCommunities(communities: ChannelType[], setSelectedCommuni
                         latitude={community.lat}>
                         <div onClick={() => {
                             setSelectedCommunity(community);
-
-                        }}> <Typography variant='h5' fontFamily={'BriemScript'}>{(community.name)}</Typography> </div>
+                        }}
+                        onMouseEnter={(e)=> setHoverCommunity(community)}
+                        onMouseLeave={(e)=>setHoverCommunity(null)}
+                        > <Typography variant='h5' fontFamily={'BriemScript'}>{(community.name)}</Typography> </div>
                     </Marker>
                 </Box>);
             </>);
