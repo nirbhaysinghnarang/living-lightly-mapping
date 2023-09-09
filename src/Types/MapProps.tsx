@@ -7,7 +7,6 @@ export interface MapProps{
     channelId:Nullable<string>,
     mapZoom: number,
     mapCenter: LatLng,
-    zoomMinMax: [number, number],
     mapBounds: [LatLng, LatLng],
     mapStyle: string,
     accessToken: string,

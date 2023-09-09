@@ -15,18 +15,18 @@ import { createLayer } from "./Geometry/routeLayer.ts";
 import { Cycle } from "./map.cycle.tsx";
 import { cycle } from "./Functions/cycle.ts";
 import { createPolygonLayer, getStatesJson } from "./Geometry/drawStates.ts";
-
+import { State, constructStates } from "../../Types/State.type.ts";
+import { getZoomLevel } from "./Geometry/getZoomLevel.ts";
+import { handleClickStateLevel } from "./Events/handleClick.ts";
 
 //Map should only show one type of content at a time.
-type VIEWMODE = "Community" | "Routes" | "Route"
+export type VIEWMODE = "State" | "Community" | "Routes" | "Route"
 
 
 export const BaseMap: React.FC<MapProps> = ({
     assetList,
-    mapZoom,
     channelId,
     mapCenter,
-    zoomMinMax,
     mapBounds,
     mapStyle,
     accessToken,
@@ -34,15 +34,11 @@ export const BaseMap: React.FC<MapProps> = ({
     hasInset
 }: MapProps) => {
 
-
-
     const MAP_OVERLAY_ASSET = assetList.find(elem => elem.id == "MAP_OVERLAY_ASSET")
     const ROUTE_START_POINT_ASSET = assetList.find(elem => elem.id == "ROUTE_START_IMG")
     const ROUTE_POINTER = assetList.find(elem => elem.id == "ROUTE_POINTER_IMG")
     const ARROW_PREV = assetList.find(elem => elem.id === "ARROW_PREV_IMG")
     const ARROW_NEXT = assetList.find(elem => elem.id === "ARROW_NEXT_IMG")
-
-
     const mapRef = useRef(null);
 
     /**
@@ -55,35 +51,55 @@ export const BaseMap: React.FC<MapProps> = ({
     const [routePoints, setRoutePoints] = useState<ChannelContent[]>(null);
     const [selectedRoutePoint, setSelectedRoutePoint] = useState<ChannelContent>(null);
     const [scopedMarker, setScopedMarker] = useState<ChannelContent>(null);
+    const [states, setStates] = useState<State[]>([]);
 
+    const [selectedState, setSelectedState] = useState<State | null>(null);
 
-    const [view, setView] = useState<VIEWMODE>("Community");
-
+    const [view, setView] = useState<VIEWMODE>("State");
 
     /**
      * useState hooks for UI management
      */
     const [showMenu, setShowMenu] = useState(false);
+    const [zoom, setZoom] = useState(getZoomLevel(view))
+
     /**
      * useEffect Hooks
      */
 
     useEffect(() => {
+        const zoomLevel = getZoomLevel(view)
+        let jumpDestination: [number, number]
+        switch (view) {
+            case "State":
+                jumpDestination = [mapCenter.lng, mapCenter.lat]
+                break
+            case "Community":
+                jumpDestination = selectedState.center.geometry.coordinates as [number, number]
+                break
+            case "Routes":
+                jumpDestination = [selectedCommunity.long, selectedCommunity.lat]
+                break;
+            case "Route":
+                jumpDestination = [selectedRoutePoint.long, selectedRoutePoint.lat]
+        }
+        panTo(jumpDestination, zoomLevel, mapRef)
+    }, [view])
+
+    useEffect(() => {
         fetchData(channelId).then((data) => {
             setCommunities(data.children)
+            setZoom(getZoomLevel(view));
         })
     }, [])
 
-    /**
-     * Cascading useEffect hooks for separation of concerns.
-     * setSelectedCommunity TRIGGERS setRoutes TRIGGERS setRouteStartPoints
-     * 
-     */
+    useEffect(() => {
+        if (communities) setStates(constructStates(communities))
+    }, [communities])
 
     useEffect(() => {
         if (selectedCommunity) {
             setShowMenu(false); //in case
-            panTo([selectedCommunity.long, selectedCommunity.lat], 8, mapRef);
             setView("Routes")
             setRoutes(selectedCommunity.children)
         }
@@ -113,7 +129,15 @@ export const BaseMap: React.FC<MapProps> = ({
     },
         [routePoints])
 
-
+    useEffect(()=>{
+        if(scopedMarker){
+            panTo(
+                [scopedMarker.long, scopedMarker.lat],
+                getZoomLevel("Route"),
+                mapRef
+            )
+        }
+    }, [scopedMarker])
 
 
 
@@ -124,16 +148,25 @@ export const BaseMap: React.FC<MapProps> = ({
                 initialViewState={{
                     longitude: mapCenter.lng,
                     latitude: mapCenter.lat,
-                    zoom: mapZoom
-
+                    zoom: zoom
                 }}
-                maxZoom={zoomMinMax[1]}
-                minZoom={zoomMinMax[0]}
                 id="primary_map"
                 ref={mapRef}
                 style={{ zIndex: 0, opacity: 0.5 }}
                 mapStyle={mapStyle}
+                scrollZoom={false}
                 mapboxAccessToken={accessToken}
+                onClick={(e) => {
+                    if (states && view === "State") {
+                        const resultOfClick: State | null = handleClickStateLevel(e.lngLat, mapRef, (states))
+                        if (resultOfClick) {
+                            setView("Community")
+                            setSelectedState(resultOfClick)
+                            setCommunities(resultOfClick.communities)
+                        }
+                    }
+
+                }}
             >
                 <Box sx={{ position: 'absolute', top: "50px", left: "80px", zIndex: 10 }}>
                     <div>
@@ -153,7 +186,6 @@ export const BaseMap: React.FC<MapProps> = ({
                     mapCenter={insetMapProps!.mapCenter}
                     mapStyle={insetMapProps!.mapStyle}
                     insetMapProps={null}
-                    zoomMinMax={insetMapProps!.zoomMinMax}
                 ></InsetMap>}
 
                 {view === "Community" && <div id="community">
@@ -164,9 +196,9 @@ export const BaseMap: React.FC<MapProps> = ({
 
                 </div>}
 
-                {communities && getStatesJson(communities).map((data: any) => {
-                    return <Source id={"state"} type="geojson" data={data} >
-                        <Layer {...createPolygonLayer()} />
+                {view == "State" && states && states.map((state: State) => {
+                    return <Source id={"state"} type="geojson" data={state.features} >
+                        <Layer id={state.name} {...createPolygonLayer()} />
                     </Source>
                 })}
                 {view === "Routes" && <div id="route-start-points">
@@ -190,15 +222,11 @@ export const BaseMap: React.FC<MapProps> = ({
                     <Cycle
                         arrowPrevImage={ARROW_PREV}
                         arrowNextImage={ARROW_NEXT}
-                        onNextArrowClick={() => { 
-                            const next = cycle(scopedMarker, routePoints, "UP")
-                            panTo([next.long, next.lat], 8, mapRef)
-                            setScopedMarker(next)
-                         }}
+                        onNextArrowClick={() => {
+                            setScopedMarker(cycle(scopedMarker, routePoints, "UP"))
+                        }}
                         onPrevArrowClick={() => {
-                            const prev = cycle(scopedMarker, routePoints, "DOWN")
-                            panTo([prev.long, prev.lat], 8, mapRef)
-                            setScopedMarker(prev)
+                            setScopedMarker(cycle(scopedMarker, routePoints, "DOWN"))
                         }}
                     />
                 </div>}

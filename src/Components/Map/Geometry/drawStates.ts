@@ -4,11 +4,11 @@ import json from '../../../Constants/Data/states_geojson.constants.json'
 import { LineLayer, } from "mapbox-gl";
 
 
-export function getStatesJson(communities:ChannelType[]){
+export function getStatesJson(communities:ChannelType[]):Record<string, any>[]{
     return communities.map((community:ChannelType)=> {return getStateJson(community)});
 }
 
-function getStateJson(community:ChannelType) {
+export function getStateJson(community:ChannelType): Record<string,any> {
     const center = [community.long, community.lat] as [number, number];
     var j:Record<string, any> = json;
     var obj = j["features"].filter((elem:any) => geoContains(elem, center))[0]

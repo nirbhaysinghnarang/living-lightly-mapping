@@ -28,11 +28,10 @@ export function renderCommunities(communities: ChannelType[], setSelectedCommuni
                     <Marker
                         longitude={community.long}
                         latitude={community.lat}>
-                        <p onClick={() => {
-
+                        <div onClick={() => {
                             setSelectedCommunity(community);
 
-                        }}> <Typography variant='h5' fontFamily={'BriemScript'}>{(community.name)}</Typography> </p>
+                        }}> <Typography variant='h5' fontFamily={'BriemScript'}>{(community.name)}</Typography> </div>
                     </Marker>
                 </Box>);
             </>);
