@@ -161,14 +161,14 @@ export const BaseMap: React.FC<MapProps> = ({
                         communities,
                         setSelectedCommunity
                     )}
-                    {communities && getStatesJson(communities).map((data: any) => 
-                    {
-                        return <Source id={"state"} type="geojson" data={data} >
-                            <Layer {...createPolygonLayer()} />
-                        </Source>
-                    })}
+
                 </div>}
 
+                {communities && getStatesJson(communities).map((data: any) => {
+                    return <Source id={"state"} type="geojson" data={data} >
+                        <Layer {...createPolygonLayer()} />
+                    </Source>
+                })}
                 {view === "Routes" && <div id="route-start-points">
                     {renderRouteStartPoints(
                         routeStartPoints,
@@ -190,8 +190,16 @@ export const BaseMap: React.FC<MapProps> = ({
                     <Cycle
                         arrowPrevImage={ARROW_PREV}
                         arrowNextImage={ARROW_NEXT}
-                        onNextArrowClick={() => { setScopedMarker(cycle(scopedMarker, routePoints, "UP")) }}
-                        onPrevArrowClick={() => { setScopedMarker(cycle(scopedMarker, routePoints, "DOWN")) }}
+                        onNextArrowClick={() => { 
+                            const next = cycle(scopedMarker, routePoints, "UP")
+                            panTo([next.long, next.lat], 8, mapRef)
+                            setScopedMarker(next)
+                         }}
+                        onPrevArrowClick={() => {
+                            const prev = cycle(scopedMarker, routePoints, "DOWN")
+                            panTo([prev.long, prev.lat], 8, mapRef)
+                            setScopedMarker(prev)
+                        }}
                     />
                 </div>}
 
