@@ -8,7 +8,6 @@ import { getBounds } from "../Map/Geometry/getBounds";
 import { getZoomLevel } from "../Map/Geometry/getZoomLevel";
 import { panTo } from "../Map/map.utils";
 import { MapRef } from "react-map-gl";
-import { type } from "@testing-library/user-event/dist/type";
 /**
  * These functions will be caused in useEffect() in [map.base.tsx] whenever
  * the stack that contains the history of a users interactions with a map is

@@ -15,11 +15,10 @@ import { createLayer } from "./Geometry/routeLayer.ts";
 import { Cycle } from "./map.cycle.tsx";
 import { cycle } from "./Functions/cycle.ts";
 import { createPolygonLayer } from "./Geometry/drawStates.ts";
-import { State, constructStates, getStateBounds } from "../../Types/State.type.ts";
+import { State, constructStates } from "../../Types/State.type.ts";
 import { getZoomLevel } from "./Geometry/getZoomLevel.ts";
 import { handleClickStateLevel } from "./Events/handleClick.ts";
-import { HistoryStack, HistoryStackElement, append, peek, selectedElementString, pop, initialStackElement } from "../../Types/History.stack.type.ts";
-import { getType } from "../../Types/TypeChecks.ts";
+import { HistoryStack, HistoryStackElement, append, peek, pop, initialStackElement } from "../../Types/History.stack.type.ts";
 import { VIEWMODE } from "../../Types/ViewMode.type.ts";
 import { ChannelPopup, ContentPopup } from "./Popups/popup.main.tsx";
 import { Overlay } from "../../Types/Overlay.type.ts";
@@ -31,7 +30,6 @@ export const BaseMap: React.FC<MapProps> = ({
     assetList,
     channelId,
     mapCenter,
-    mapBounds,
     mapStyle,
     accessToken,
     insetMapProps,
@@ -56,7 +54,6 @@ export const BaseMap: React.FC<MapProps> = ({
     const [selectedRoutePoint, setSelectedRoutePoint] = useState<ChannelContent>(null);
     const [scopedMarker, setScopedMarker] = useState<ChannelContent>(null);
     const [states, setStates] = useState<State[]>([]);
-    const [selectedState, setSelectedState] = useState<State | null>(null);
     const [view, setView] = useState<VIEWMODE>("State");
     const [hoverCommunity, setHoverCommunity] = useState<ChannelType>(null);
     const [hoverRoute, setHoverRoute] = useState<ChannelType>(null);
@@ -89,7 +86,6 @@ export const BaseMap: React.FC<MapProps> = ({
             panTo([mapCenter.lng, mapCenter.lat], getZoomLevel("State"), mapRef)
             setView("State")
             setSelectedCommunity(null);
-            setSelectedState(null);
             setSelectedRoutePoint(null);
             mapRef.current && mapRef.current.getMap().setMaxBounds(BASE_MAP_BOUNDS)
         }
@@ -187,10 +183,7 @@ export const BaseMap: React.FC<MapProps> = ({
                         const resultOfClick: State | null = handleClickStateLevel(e.lngLat, mapRef, (states))
                         if (resultOfClick) {
                             setView("Community")
-                            setSelectedState(resultOfClick)
                             setCommunities(resultOfClick.communities)
-                            //this is where we add the first element to the history stack because
-                            //this is where user interaction actually begins.
                             const stackTop: HistoryStackElement = {
                                 view: "Community",
                                 selectedElement: resultOfClick

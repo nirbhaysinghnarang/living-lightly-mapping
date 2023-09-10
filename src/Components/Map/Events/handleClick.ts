@@ -1,11 +1,11 @@
-import { LngLat, Map } from "mapbox-gl";
+import { LngLat } from "mapbox-gl";
 import { State } from "../../../Types/State.type";
 import { geoContains } from "d3-geo";
 import { panTo } from "../map.utils";
 import { getZoomLevel } from "../Geometry/getZoomLevel";
+import { MapRef } from "react-map-gl";
 
-
-export function handleClickStateLevel(position: LngLat, mapRef: React.RefObject<Map>, states: State[]): State|null{
+export function handleClickStateLevel(position: LngLat, mapRef: React.RefObject<MapRef>, states: State[]): State|null{
     if (mapRef.current) {
         //get states
         const filtered = states.filter((state: State) => {

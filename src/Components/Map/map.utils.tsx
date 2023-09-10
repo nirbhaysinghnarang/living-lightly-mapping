@@ -1,5 +1,4 @@
 import { Marker } from 'react-map-gl';
-import { Map } from "mapbox-gl";
 import React, { ReactNode } from "react";
 import { Box, Typography } from "@mui/material";
 import { ChannelContent, ChannelType } from "../../Types/Channel.types";
