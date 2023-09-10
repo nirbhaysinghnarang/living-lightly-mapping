@@ -5,7 +5,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { Map, Source, Layer } from 'react-map-gl';
 import { InsetMap } from "./map.inset.tsx";
 import { extractNestedIds, fetchData, getOverlays } from "./Functions/fetchData.ts";
-import { ChannelContent, ChannelType } from "../../Types/Channel.types.ts";
+import { ChannelContent, ChannelType, getBounds } from "../../Types/Channel.types.ts";
 import { Menu as MapMenu } from "./map.menu.tsx";
 import { MenuOutlined } from "@mui/icons-material";
 import { panTo, renderRoutePoints } from "./map.utils.tsx";
@@ -15,7 +15,7 @@ import { createLayer } from "./Geometry/routeLayer.ts";
 import { Cycle } from "./map.cycle.tsx";
 import { cycle } from "./Functions/cycle.ts";
 import { createPolygonLayer } from "./Geometry/drawStates.ts";
-import { State, constructStates } from "../../Types/State.type.ts";
+import { State, constructStates, getStateBounds } from "../../Types/State.type.ts";
 import { getZoomLevel } from "./Geometry/getZoomLevel.ts";
 import { handleClickStateLevel } from "./Events/handleClick.ts";
 import { HistoryStack, HistoryStackElement, append, peek, selectedElementString, pop, initialStackElement } from "../../Types/History.stack.type.ts";
@@ -87,6 +87,7 @@ export const BaseMap: React.FC<MapProps> = ({
             const zoomLevel = getZoomLevel(stackTop.view)
             setView(stackTop.view)
             const typeOfTop: selectedElementString = getType(stackTop.selectedElement)
+
             let jumpDestination: [number, number]
             switch (typeOfTop) {
                 case "State":
@@ -113,8 +114,6 @@ export const BaseMap: React.FC<MapProps> = ({
 
     }, [historyStack])
 
-    useEffect(() => { console.log(overlays) }, [overlays])
-
     useEffect(() => {
         fetchData(channelId).then((data) => {
             setCommunities(data.children)
@@ -130,6 +129,7 @@ export const BaseMap: React.FC<MapProps> = ({
     useEffect(() => {
         if (selectedCommunity) {
             setShowMenu(false); //in case
+            setOverlays([])
             setRoutes(selectedCommunity.children)
             setHistoryStack((prevStack: HistoryStack) => {
                 return append([...prevStack],
