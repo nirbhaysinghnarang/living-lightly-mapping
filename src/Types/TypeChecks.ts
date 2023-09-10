@@ -4,6 +4,8 @@ import { selectedElementString } from "./History.stack.type";
 
 
 type toCheck = State | ChannelType | ChannelContent
+
+
 function isState(item:toCheck):boolean{
     return "center" in item
 }
@@ -20,6 +22,7 @@ function isChannelContent(item:toCheck): boolean{
 export function getType(item:toCheck): selectedElementString{
     if(!item) return null
     if(isState(item)) return "State"
-    if(isChannelType) return "ChannelType"
+    if(isChannelType(item)) return "ChannelType"
     return "ChannelContent"
+    
 }

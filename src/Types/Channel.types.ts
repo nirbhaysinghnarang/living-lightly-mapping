@@ -1,5 +1,6 @@
 import { Nullable } from 'tsdef';
 import { Overlay } from './Overlay.type';
+import { BoxBound, MapBounds, get2DBounds } from './Bounds.type';
 /**
  * This file contains types to fit in with the existing MVC typing system and exports them globally.
  */
@@ -67,47 +68,3 @@ type Tileset = {
     url: string
 }
 
-/**
- * Recursively computes
- * 1. minLat
- * 2. maxLat
- * 3. minLng
- * 4. maxLng
- * for an entire channel.
- * @param channel 
- */
-export function getBounds(channel: ChannelType) {
-    var minLat = Infinity
-    var minLng = Infinity
-    var maxLat = -Infinity
-    var maxLng = -Infinity
-    function recurse(channel: ChannelType): number[][] {
-        if (!channel) return
-        if (channel.contents && channel.contents.length!==0) {
-            const lats = channel.contents.map((content: ChannelContent) => content.lat)
-            const lngs = channel.contents.map((content: ChannelContent) => content.long)
-            minLat = Math.min(minLat, ...lats);
-            maxLat = Math.max(maxLat, ...lats);
-            minLng = Math.min(minLng, ...lngs);
-            maxLng = Math.max(maxLng, ...lngs);
-            return [
-                [minLng, minLat], 
-                [maxLng, maxLat]
-            ]
-        }
-        if(channel.children){
-            channel.children.forEach((child:ChannelType)=>{
-                const boundsOfChild = recurse(child)
-                maxLat = Math.max(maxLat, boundsOfChild[1][1])
-                minLat = Math.min(maxLat, boundsOfChild[0][1])
-                minLng = Math.min(maxLat, boundsOfChild[1][0])
-                maxLng = Math.max(maxLat, boundsOfChild[1][0])
-            })
-        }
-        return [
-            [minLng, minLat], 
-            [maxLng, maxLat]
-        ]
-    }
-    return recurse(channel)
-}

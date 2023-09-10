@@ -1,8 +1,10 @@
-import { ChannelType, getBounds } from "./Channel.types"
+import { ChannelType } from "./Channel.types"
+import { getBounds } from "../Components/Map/Geometry/getBounds";
 import { getStatesJson } from "../Components/Map/Geometry/drawStates"
 import { geoContains } from 'd3-geo';
 import { Feature, Polygon, Point, center } from "@turf/turf";
 import { BASE_MAP_BOUNDS } from "../Constants/map";
+import { BoxBound, MapBounds, get2DBounds, getBoundsFromBox } from "./Bounds.type";
 
 export type State = {
     name: string,
@@ -39,32 +41,26 @@ export function constructStates(communities: ChannelType[]): State[] {
 /**
  * 
  * @param state 
- * @returns a 2d matrix representing the 'bounds' of a state depending on all nested communities
+ * @returns a 2d matrix representing the maximal geographical 'bounds' of a state depending on all nested communities
  */
-export function getStateBounds(state:State): number[][]{
+export function getStateBounds(state:State): BoxBound{
     if(!state || !state.communities || state.communities.length === 0){
-        return BASE_MAP_BOUNDS
+        return BASE_MAP_BOUNDS as BoxBound
     }
-
-    var minLng = Infinity
-    var minLat = Infinity
-    var maxLat = -Infinity
-    var maxLng = -Infinity
-
+    var stateBounds:MapBounds = {
+        minLng: Infinity,
+        minLat:Infinity,
+        maxLat:-Infinity,
+         maxLng:-Infinity
+    }
     state.communities.forEach((community:ChannelType)=>{
-        const [
-            [maxLngComm, minLatComm], 
-            [minLngComm, maxLatComm]
-        ] = getBounds(community)
-        minLng = Math.min(minLng, minLngComm)
-        maxLng = Math.max(maxLng, maxLngComm)
-        minLat = Math.min(minLat, minLatComm)
-        maxLat = Math.max(maxLat, maxLatComm)
+        const communityBounds = getBoundsFromBox(getBounds(community))
+        stateBounds.minLng = Math.min(stateBounds.minLng, communityBounds.minLng)
+        stateBounds.maxLng = Math.max(stateBounds.maxLng, communityBounds.maxLng)
+        stateBounds.minLat = Math.min(stateBounds.minLat, communityBounds.minLat)
+        stateBounds.maxLat = Math.max(stateBounds.maxLat, communityBounds.maxLat)
     })
 
-    return [
-        [minLng, minLat], 
-        [maxLng, maxLat]
-    ]
+   return  get2DBounds(stateBounds)
 
 }

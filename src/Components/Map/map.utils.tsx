@@ -4,7 +4,9 @@ import React, { ReactNode } from "react";
 import { Box, Typography } from "@mui/material";
 import { ChannelContent, ChannelType } from "../../Types/Channel.types";
 import { Asset } from '../../Types/Asset.type';
-export const panTo = (coords: [number, number], zoom: number, mapRef: React.RefObject<Map>) => {
+import { MapRef } from "react-map-gl";
+
+export const panTo = (coords: [number, number], zoom: number, mapRef: React.RefObject<MapRef>) => {
     if (mapRef.current) {
         mapRef.current.flyTo(
             {

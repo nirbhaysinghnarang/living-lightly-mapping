@@ -5,7 +5,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { Map, Source, Layer } from 'react-map-gl';
 import { InsetMap } from "./map.inset.tsx";
 import { extractNestedIds, fetchData, getOverlays } from "./Functions/fetchData.ts";
-import { ChannelContent, ChannelType, getBounds } from "../../Types/Channel.types.ts";
+import { ChannelContent, ChannelType } from "../../Types/Channel.types.ts";
 import { Menu as MapMenu } from "./map.menu.tsx";
 import { MenuOutlined } from "@mui/icons-material";
 import { panTo, renderRoutePoints } from "./map.utils.tsx";
@@ -23,10 +23,9 @@ import { getType } from "../../Types/TypeChecks.ts";
 import { VIEWMODE } from "../../Types/ViewMode.type.ts";
 import { ChannelPopup, ContentPopup } from "./Popups/popup.main.tsx";
 import { Overlay } from "../../Types/Overlay.type.ts";
-import { type } from "@testing-library/user-event/dist/type/index";
 import { Marker } from "react-map-gl";
-import { image } from "d3";
-import zIndex from "@mui/material/styles/zIndex";
+import { setBounds } from "../State/map.state.handler.ts";
+import { BASE_MAP_BOUNDS } from "../../Constants/map.ts";
 
 export const BaseMap: React.FC<MapProps> = ({
     assetList,
@@ -84,32 +83,15 @@ export const BaseMap: React.FC<MapProps> = ({
     useEffect(() => {
         if (historyStack && historyStack.length > 1) {
             const stackTop = peek(historyStack)
-            const zoomLevel = getZoomLevel(stackTop.view)
             setView(stackTop.view)
-            const typeOfTop: selectedElementString = getType(stackTop.selectedElement)
-
-            let jumpDestination: [number, number]
-            switch (typeOfTop) {
-                case "State":
-                    setOverlays([])
-                    const stateElt = stackTop.selectedElement as State
-                    jumpDestination = stateElt.center.geometry.coordinates as [number, number]
-                    break
-                case "ChannelType":
-                    const typeElt = stackTop.selectedElement as ChannelType
-                    setOverlays(typeElt.overlays)
-                    jumpDestination = [typeElt.long, typeElt.lat]
-                    break
-                case "ChannelContent":
-                    setOverlays([])
-                    const contentElt = stackTop.selectedElement as ChannelContent
-                    jumpDestination = [contentElt.long, contentElt.lat]
-                    break
-            }
-            panTo(jumpDestination, zoomLevel, mapRef)
+            setBounds(stackTop, mapRef)
         } else {
             panTo([mapCenter.lng, mapCenter.lat], getZoomLevel("State"), mapRef)
             setView("State")
+            setSelectedCommunity(null);
+            setSelectedState(null);
+            setSelectedRoutePoint(null);
+            mapRef.current && mapRef.current.getMap().setMaxBounds(BASE_MAP_BOUNDS)
         }
 
     }, [historyStack])
