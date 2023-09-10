@@ -21,8 +21,12 @@ import { handleClickStateLevel } from "./Events/handleClick.ts";
 import { HistoryStack, HistoryStackElement, append, peek, selectedElementString, pop, initialStackElement } from "../../Types/History.stack.type.ts";
 import { getType } from "../../Types/TypeChecks.ts";
 import { VIEWMODE } from "../../Types/ViewMode.type.ts";
-import { ChannelPopup } from "./Popups/community.popup.tsx";
-
+import { ChannelPopup, ContentPopup } from "./Popups/popup.main.tsx";
+import { Overlay } from "../../Types/Overlay.type.ts";
+import { type } from "@testing-library/user-event/dist/type/index";
+import { Marker } from "react-map-gl";
+import { image } from "d3";
+import zIndex from "@mui/material/styles/zIndex";
 
 export const BaseMap: React.FC<MapProps> = ({
     assetList,
@@ -58,6 +62,7 @@ export const BaseMap: React.FC<MapProps> = ({
     const [hoverCommunity, setHoverCommunity] = useState<ChannelType>(null);
     const [hoverRoute, setHoverRoute] = useState<ChannelType>(null);
     const [hoverRoutePoints, setHoverRoutePoints] = useState<ChannelContent[]>(null);
+    const [overlays, setOverlays] = useState<Overlay[]>([]);
 
     const [historyStack, setHistoryStack] = useState<HistoryStack>([
         initialStackElement
@@ -69,16 +74,14 @@ export const BaseMap: React.FC<MapProps> = ({
     const [showMenu, setShowMenu] = useState(false);
     const [zoom, setZoom] = useState(getZoomLevel(view))
 
-    useEffect(() => { if(hoverCommunity && typeof(hoverRoute)!=="undefined") {setHoverRoutePoints(hoverRoute.contents)}}, [hoverRoute])
+    useEffect(() => { if (hoverCommunity && typeof (hoverRoute) !== "undefined") { setHoverRoutePoints(hoverRoute.contents) } }, [hoverRoute])
 
     /**
      * useEffect Hooks
      */
 
-    //This useEffect hook will automagically set zoom level and proper coordinates based on the last element on the stack.
+    //This useEffect hook will automagically set zoom level, proper coordinates, and overlays based on the last element on the stack.
     useEffect(() => {
-
-
         if (historyStack && historyStack.length > 1) {
             const stackTop = peek(historyStack)
             const zoomLevel = getZoomLevel(stackTop.view)
@@ -87,14 +90,17 @@ export const BaseMap: React.FC<MapProps> = ({
             let jumpDestination: [number, number]
             switch (typeOfTop) {
                 case "State":
+                    setOverlays([])
                     const stateElt = stackTop.selectedElement as State
                     jumpDestination = stateElt.center.geometry.coordinates as [number, number]
                     break
                 case "ChannelType":
                     const typeElt = stackTop.selectedElement as ChannelType
+                    setOverlays(typeElt.overlays)
                     jumpDestination = [typeElt.long, typeElt.lat]
                     break
                 case "ChannelContent":
+                    setOverlays([])
                     const contentElt = stackTop.selectedElement as ChannelContent
                     jumpDestination = [contentElt.long, contentElt.lat]
                     break
@@ -107,9 +113,10 @@ export const BaseMap: React.FC<MapProps> = ({
 
     }, [historyStack])
 
+    useEffect(() => { console.log(overlays) }, [overlays])
+
     useEffect(() => {
         fetchData(channelId).then((data) => {
-
             setCommunities(data.children)
             setZoom(getZoomLevel(view));
         })
@@ -233,7 +240,6 @@ export const BaseMap: React.FC<MapProps> = ({
                     mapStyle={insetMapProps!.mapStyle}
                     insetMapProps={null}
                 ></InsetMap>}
-
                 {view === "Community" && <div id="community">
                     {renderCommunities(
                         communities,
@@ -241,9 +247,8 @@ export const BaseMap: React.FC<MapProps> = ({
                         setHoverCommunity
                     )}
                     {hoverCommunity && <ChannelPopup channel={hoverCommunity} fixed={false}></ChannelPopup>}
-
-                </div>}
-
+                </div>
+                }
                 {view == "State" && states && states.map((state: State) => {
                     return <Source id={"state"} type="geojson" data={state.features} >
                         <Layer id={state.name} {...createPolygonLayer()} />
@@ -285,7 +290,9 @@ export const BaseMap: React.FC<MapProps> = ({
                             setScopedMarker(cycle(scopedMarker, routePoints, "DOWN"))
                         }}
                     />
+                    {scopedMarker && <ContentPopup content={scopedMarker} ></ContentPopup>}
                 </div>}
+
 
                 {
                     historyStack && historyStack.length > 1 &&
@@ -299,19 +306,32 @@ export const BaseMap: React.FC<MapProps> = ({
                         setHistoryStack((prev: HistoryStack) => {
                             return pop([...prev])
                         })
-
                     }}>
                         <Typography variant="body1" sx={{ fontFamily: "BriemScript", fontWeight: 800 }}>Back</Typography>
 
                     </Button>
-
                 }
 
+                {(overlays) && overlays.map((overlay: Overlay) => {
+                    return (
+                        <>
+                            <Marker
+                                longitude={(overlay.br_long + overlay.tl_long) / 2}
+                                latitude={(overlay.br_lat + overlay.tl_lat) / 2}>
+                                <div >
+                                    {overlay.image.formats.thumbnail.height && overlay.image.formats.thumbnail.width &&
+                                        <img src={overlay.image.url} 
+                                        alt={'overlay'} 
+                                        height={overlay.image.formats.thumbnail.height} 
+                                        width={overlay.image.formats.thumbnail.width} 
+                                        />
+                                    }
+                                </div>
+                            </Marker>
+                        </>
 
-
-
-
-
+                    );
+                })}
             </Map>
         </Box>
 

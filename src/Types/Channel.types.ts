@@ -1,4 +1,5 @@
 import { Nullable } from 'tsdef';
+import { Overlay } from './Overlay.type';
 /**
  * This file contains types to fit in with the existing MVC typing system and exports them globally.
  */
@@ -29,6 +30,7 @@ export type ChannelType = {
     name:string,
     order: Nullable<number>,
     uniqueID:string,
+    overlays: Overlay[]
     tileset:Nullable<Tileset>
     picture:Nullable<{
         formats:Nullable<any>,
@@ -55,8 +57,7 @@ export type ChannelContent = {
 
 type MediaFile = {
     caption: Nullable<String>,
-    url:String,
-
+    url:string,
 }
 
 type Tileset = {

@@ -31,12 +31,20 @@ export function renderCommunities(
                     <Marker
                         longitude={community.long}
                         latitude={community.lat}
+                        style={{zIndex:10}}
                     >
-                        <div onClick={() => {
+                        <div onClick={(e) => {
+                            e.stopPropagation()
                             setSelectedCommunity(community);
                         }}
-                            onMouseEnter={() => setHoverCommunity(community)}
-                            onMouseLeave={() => setHoverCommunity(null)}
+                            onMouseEnter={(e) => {
+                                e.stopPropagation()
+                                setHoverCommunity(community)
+                            }}
+                            onMouseLeave={(e) => {
+                                e.stopPropagation()
+                                setHoverCommunity(null)
+                            }}
                         > <Typography variant='h5' fontFamily={'BriemScript'}>{(community.name)}</Typography> </div>
                     </Marker>
                 </Box>);
@@ -65,6 +73,7 @@ export function renderRouteStartPoints(
                     return (
                         <>
                             <Marker
+                                style={{zIndex:10}}
                                 key={marker.id}
                                 longitude={marker.long}
                                 latitude={marker.lat}>
@@ -93,11 +102,13 @@ export function renderRoutePoints(routePoints: ChannelContent[], onClick: (marke
             {routePoints.map((marker: ChannelContent) => (
                 <div key={marker.id}>
                     <Marker
+                    
                         longitude={marker.long}
                         latitude={marker.lat}
                         onClick={() => onClick(marker)}
                         style={{
                             cursor: 'pointer',
+                            zIndex:10,
                             display: 'flex',
                             flexDirection: 'column',
                             justifyContent: 'center',

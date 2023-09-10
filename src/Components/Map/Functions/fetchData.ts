@@ -1,6 +1,7 @@
 import { AxiosResponse } from "axios";
 import { getSubChannel, getChannel, getContentForChannel } from "../../../Client/mvc.client";
 import { ChannelType, ChannelContent} from "../../../Types/Channel.types";
+import { Overlay, isValidOverlay } from "../../../Types/Overlay.type";
 
 
 
@@ -19,7 +20,8 @@ function _createEmptyChannel(): ChannelType{
         createdAt:"",
         updatedAt:"",
         tileset:null,
-        picture:null
+        picture:null,
+        overlays:[]
     }
 }
 
@@ -31,7 +33,6 @@ function _createEmptyChannel(): ChannelType{
 export async function fetchData(channelId:string): Promise<ChannelType>{
     async function recurse(channelId:string, channel:ChannelType):Promise<ChannelType>{
         return await getChannel(channelId).then(async (channelResponse:AxiosResponse<ChannelType>)=>{
-            console.log(channelResponse.data)
             const data:ChannelType = channelResponse.data
             channel.editors = data.editors
             channel.description = data.description
@@ -46,6 +47,8 @@ export async function fetchData(channelId:string): Promise<ChannelType>{
             channel.name = data.name
             channel.order = data.order
             channel.contents = []
+            //filter for valid overlays.
+            channel.overlays = data.overlays.filter((overlay:Overlay)=>!isValidOverlay(overlay))
             if(data.contents.length !==0){
                 channel.contents = data.contents
                 return channel
