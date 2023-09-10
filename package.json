@@ -30,9 +30,7 @@
     "turf-linestring": "^1.0.2",
     "web-vitals": "^2.1.4"
   },
-  "devDependencies": {
-    "tailwindcss": "^3.3.2"
-  },
+
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
