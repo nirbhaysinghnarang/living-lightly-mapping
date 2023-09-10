@@ -6,7 +6,7 @@ import { Map, Source, Layer } from 'react-map-gl';
 import { InsetMap } from "./map.inset.tsx";
 import { extractNestedIds, fetchData, getOverlays } from "./Functions/fetchData.ts";
 import { ChannelContent, ChannelType } from "../../Types/Channel.types.ts";
-import { Menu as MapMenu } from "../map.menu.tsx";
+import { Menu as MapMenu } from "./map.menu.tsx";
 import { MenuOutlined } from "@mui/icons-material";
 import { panTo, renderRoutePoints } from "./map.utils.tsx";
 import { renderCommunities, renderRouteStartPoints } from "./map.utils.tsx";
@@ -21,8 +21,7 @@ import { handleClickStateLevel } from "./Events/handleClick.ts";
 import { HistoryStack, HistoryStackElement, append, peek, selectedElementString, pop, initialStackElement } from "../../Types/History.stack.type.ts";
 import { getType } from "../../Types/TypeChecks.ts";
 import { VIEWMODE } from "../../Types/ViewMode.type.ts";
-import { stack } from "d3";
-import { CommunityPopup } from "./Popups/community.popup.tsx";
+import { ChannelPopup } from "./Popups/community.popup.tsx";
 
 
 export const BaseMap: React.FC<MapProps> = ({
@@ -56,7 +55,9 @@ export const BaseMap: React.FC<MapProps> = ({
     const [states, setStates] = useState<State[]>([]);
     const [selectedState, setSelectedState] = useState<State | null>(null);
     const [view, setView] = useState<VIEWMODE>("State");
-    const [hoverCommunity, setHoverCommunity] = useState<ChannelType>(null)
+    const [hoverCommunity, setHoverCommunity] = useState<ChannelType>(null);
+    const [hoverRoute, setHoverRoute] = useState<ChannelType>(null);
+    const [hoverRoutePoints, setHoverRoutePoints] = useState<ChannelContent[]>(null);
 
     const [historyStack, setHistoryStack] = useState<HistoryStack>([
         initialStackElement
@@ -68,7 +69,7 @@ export const BaseMap: React.FC<MapProps> = ({
     const [showMenu, setShowMenu] = useState(false);
     const [zoom, setZoom] = useState(getZoomLevel(view))
 
-    useEffect(()=>{console.log(hoverCommunity)},[hoverCommunity])
+    useEffect(() => { if(hoverCommunity && typeof(hoverRoute)!=="undefined") {setHoverRoutePoints(hoverRoute.contents)}}, [hoverRoute])
 
     /**
      * useEffect Hooks
@@ -77,8 +78,8 @@ export const BaseMap: React.FC<MapProps> = ({
     //This useEffect hook will automagically set zoom level and proper coordinates based on the last element on the stack.
     useEffect(() => {
 
-      
-        if (historyStack && historyStack.length>1) {
+
+        if (historyStack && historyStack.length > 1) {
             const stackTop = peek(historyStack)
             const zoomLevel = getZoomLevel(stackTop.view)
             setView(stackTop.view)
@@ -108,7 +109,7 @@ export const BaseMap: React.FC<MapProps> = ({
 
     useEffect(() => {
         fetchData(channelId).then((data) => {
-            
+
             setCommunities(data.children)
             setZoom(getZoomLevel(view));
         })
@@ -239,8 +240,7 @@ export const BaseMap: React.FC<MapProps> = ({
                         setSelectedCommunity,
                         setHoverCommunity
                     )}
-                    {hoverCommunity && <CommunityPopup community={hoverCommunity} fixed={false}></CommunityPopup>
-                    }
+                    {hoverCommunity && <ChannelPopup channel={hoverCommunity} fixed={false}></ChannelPopup>}
 
                 </div>}
 
@@ -253,10 +253,17 @@ export const BaseMap: React.FC<MapProps> = ({
                     {renderRouteStartPoints(
                         routeStartPoints,
                         setSelectedRoutePoint,
-                        ROUTE_START_POINT_ASSET
+                        ROUTE_START_POINT_ASSET,
+                        setHoverRoute,
+                        routes
                     )}
-                    {selectedCommunity && <CommunityPopup community={selectedCommunity} fixed={true}></CommunityPopup>}
+                    {selectedCommunity && <ChannelPopup channel={selectedCommunity} fixed={true}></ChannelPopup>}
+                    {hoverRoute && <ChannelPopup channel={hoverRoute} fixed={false}></ChannelPopup>}
+                    {hoverRoute && hoverRoutePoints && <Source id="routes" type="geojson" data={createLineGeoJson(hoverRoutePoints)}>
+                        {<Layer {...createLayer()}></Layer>}
+                    </Source>}
                 </div>}
+
 
                 {view === "Route" && scopedMarker && routePoints && routePoints.length !== 0 && <div id="route-points">
                     {renderRoutePoints(
@@ -281,23 +288,23 @@ export const BaseMap: React.FC<MapProps> = ({
                 </div>}
 
                 {
-                    historyStack && historyStack.length > 1 && 
+                    historyStack && historyStack.length > 1 &&
                     <Button sx={{
-                    position:"absolute",
-                    top: "50px", 
-                    right: "80px", 
-                    zIndex: 10,
-                    color:"black"
-                }}onClick={() => {
-                    setHistoryStack((prev: HistoryStack) => {
-                        return pop([...prev])
-                    })
+                        position: "absolute",
+                        top: "50px",
+                        right: "80px",
+                        zIndex: 10,
+                        color: "black"
+                    }} onClick={() => {
+                        setHistoryStack((prev: HistoryStack) => {
+                            return pop([...prev])
+                        })
 
-                }}> 
-                    <Typography variant="body1" sx={{fontFamily:"BriemScript", fontWeight:800}}>Back</Typography>
-                
-                 </Button>
-                
+                    }}>
+                        <Typography variant="body1" sx={{ fontFamily: "BriemScript", fontWeight: 800 }}>Back</Typography>
+
+                    </Button>
+
                 }
 
 

@@ -1,5 +1,5 @@
 import { ArrowForward as ArrowIcon } from "@mui/icons-material";
-import { ChannelType } from "../Types/Channel.types";
+import { ChannelType } from "../../Types/Channel.types";
 import React, { useState } from 'react';
 import { makeStyles, createStyles} from '@mui/styles';
 import Button from '@mui/material/Button';
