@@ -10,7 +10,7 @@ export const panTo = (coords: [number, number], zoom: number, mapRef: React.RefO
         mapRef.current.flyTo(
             {
                 center: coords, zoom: zoom,
-                speed: 5,
+                speed: 1,
                 curve: 1,
                 easing(t: number) {
                     return t;
@@ -35,7 +35,6 @@ export function renderCommunities(
                         style={{zIndex:10}}
                     >
                         <div onClick={(e) => {
-                            e.stopPropagation()
                             setSelectedCommunity(community);
                         }}
                             onMouseEnter={(e) => {
@@ -94,19 +93,15 @@ export function renderRouteStartPoints(
         </div>);
 }
 
-export function renderRoutePoints(routePoints: ChannelContent[], onClick: (marker: ChannelContent) => void, scopedMarker: ChannelContent, image: Asset): ReactNode {
-
-
-
+export function renderRoutePoints(routePoints: ChannelContent[], scopedMarker: ChannelContent, image: Asset): ReactNode {
     return (
         <>
             {routePoints.map((marker: ChannelContent) => (
                 <div key={marker.id}>
                     <Marker
-                    
                         longitude={marker.long}
                         latitude={marker.lat}
-                        onClick={() => onClick(marker)}
+                        
                         style={{
                             cursor: 'pointer',
                             zIndex:10,
@@ -115,7 +110,7 @@ export function renderRoutePoints(routePoints: ChannelContent[], onClick: (marke
                             justifyContent: 'center',
                         }}
                     >
-                        {(scopedMarker.lat === marker.lat && scopedMarker.long === marker.long) ? (
+                        {(scopedMarker.id === marker.id) ? (
                             <>
                                 <img src={image.url} style={{ margin: 'auto', width: '30px', height: '40px' }} /> {/* Apply native styles */}
                                 <p style={{ fontFamily: 'BriemScript', color: '#894E35', fontSize: '20px', fontWeight: 700 }}>{marker.title}</p> {/* Apply native styles */}

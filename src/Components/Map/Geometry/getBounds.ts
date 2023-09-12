@@ -9,8 +9,6 @@ import { MapBounds, BoxBound, get2DBounds, getBoundsFromBox } from "../../../Typ
  * for an entire channel.
  * @param channel 
  */
-
-
 export function getBounds(channel: ChannelType):BoxBound {
     var mapBounds:MapBounds = {
         minLat:Infinity,
@@ -23,7 +21,6 @@ export function getBounds(channel: ChannelType):BoxBound {
         if (channel.contents && channel.contents.length!==0) {
             const lats = channel.contents.map((content: ChannelContent) => content.lat)
             const lngs = channel.contents.map((content: ChannelContent) => content.long)
-            console.log(Math.min(...lngs))
             const bounds:MapBounds = {
                 minLat:Math.min(mapBounds.minLat, ...lats),
                 maxLat:Math.max(mapBounds.maxLat, ...lats),

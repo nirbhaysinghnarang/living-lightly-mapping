@@ -6,7 +6,7 @@ function App() {
       <>
           <BrowserRouter>
               <Routes>
-                  <Route path={'/map'} element={<BaseMap {...buildBaseMapProps()}/>}/>
+                  <Route path={'*'} element={<BaseMap {...buildBaseMapProps()}/>}/>
               </Routes>
           </BrowserRouter>
       </>

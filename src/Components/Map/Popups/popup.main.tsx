@@ -25,24 +25,22 @@ export const ChannelPopup: React.FC<ChannelPopupProps> = ({ channel, fixed }: Ch
         </Stack>);
     }
 
-
     if (!channel) return;
     if (!fixed) return (
-        <Popup anchor="top" closeButton={false} latitude={channel.lat} longitude={channel.long} offset={50} style={{ padding: 10 }}>
+        <Popup anchor="top" closeOnClick={false}  closeButton={false} latitude={channel.lat} longitude={channel.long} offset={50} style={{ padding: 10 }}>
             {_renderContents()}
         </Popup>);
 
-    return <Box style={{ padding: 10, border: '2px dashed black', position: "absolute", top: 200, right: 100, maxWidth: 300, opacity: 1 }}>
+    return <Popup closeOnClick={false} offset={50} closeButton={false}  latitude={channel.lat} longitude={channel.long} style={{ padding: 10, position: "absolute", top: 200, right: 100, maxWidth: 300, opacity: 1 }}>
         {_renderContents()}
-    </Box>
+    </Popup>
 }
 
 
 export const ContentPopup: React.FC<ContentPopupProps> = ({ content }: ContentPopupProps) => {
     if (!content) return;
-
     return (
-        <Popup anchor="top" closeButton={false} latitude={content.lat} longitude={content.long} offset={50} style={{ padding: 10 }}>
+        <Popup  closeOnClick={false}  anchor="top" closeButton={false} latitude={content.lat} longitude={content.long} offset={50} style={{ padding: 10 }}>
             <Stack direction="column" flex={1} justifyContent={"flex-start"} alignItems={"flex-start"}>
                 <Typography variant="body1" sx={{ fontFamily: "Gotu", width: "100%" }} gutterBottom>
                     {content.title}

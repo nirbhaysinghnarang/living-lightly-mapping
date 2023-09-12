@@ -4,7 +4,7 @@ import { Box, Button, Typography } from '@mui/material';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Map, Source, Layer } from 'react-map-gl';
 import { InsetMap } from "./map.inset.tsx";
-import { extractNestedIds, fetchData, getOverlays } from "./Functions/fetchData.ts";
+import {fetchData } from "./Functions/fetchData.ts";
 import { ChannelContent, ChannelType } from "../../Types/Channel.types.ts";
 import { Menu as MapMenu } from "./map.menu.tsx";
 import { MenuOutlined } from "@mui/icons-material";
@@ -23,7 +23,7 @@ import { VIEWMODE } from "../../Types/ViewMode.type.ts";
 import { ChannelPopup, ContentPopup } from "./Popups/popup.main.tsx";
 import { Overlay } from "../../Types/Overlay.type.ts";
 import { Marker } from "react-map-gl";
-import { setBounds } from "../State/map.state.handler.ts";
+import { setBounds, updateState } from "../State/map.state.handler.ts";
 import { BASE_MAP_BOUNDS } from "../../Constants/map.ts";
 
 export const BaseMap: React.FC<MapProps> = ({
@@ -81,7 +81,20 @@ export const BaseMap: React.FC<MapProps> = ({
         if (historyStack && historyStack.length > 1) {
             const stackTop = peek(historyStack)
             setView(stackTop.view)
-            setBounds(stackTop, mapRef)
+            setBounds(stackTop, mapRef, setOverlays)
+            updateState(
+                stackTop,
+                setSelectedCommunity,
+                setSelectedRoutePoint,
+                setShowMenu,
+                setScopedMarker,
+                setRouteStartPoints,
+                setRoutePoints,
+                setOverlays,
+                setRoutes, 
+                setView,
+                routes
+            )
         } else {
             panTo([mapCenter.lng, mapCenter.lat], getZoomLevel("State"), mapRef)
             setView("State")
@@ -99,16 +112,12 @@ export const BaseMap: React.FC<MapProps> = ({
         })
     }, [])
 
-
     useEffect(() => {
         if (communities) setStates(constructStates(communities))
     }, [communities])
 
     useEffect(() => {
-        if (selectedCommunity) {
-            setShowMenu(false); //in case
-            setOverlays([])
-            setRoutes(selectedCommunity.children)
+        if (selectedCommunity && peek(historyStack).selectedElement !== selectedCommunity) {
             setHistoryStack((prevStack: HistoryStack) => {
                 return append([...prevStack],
                     {
@@ -120,19 +129,9 @@ export const BaseMap: React.FC<MapProps> = ({
         }
     }, [selectedCommunity])
 
-    useEffect(() => {
-        if (routes) {
-            setRouteStartPoints(
-                routes.map((route: ChannelType) => route.contents.at(0))
-            )
-        }
-    }, [routes])
 
     useEffect(() => {
         if (selectedRoutePoint) {
-            setRoutePoints(
-                routes.find((route: ChannelType) => route.contents.at(0) === selectedRoutePoint).contents
-            )
             setHistoryStack((prevStack: HistoryStack) => {
                 return append([...prevStack],
                     {
@@ -144,12 +143,6 @@ export const BaseMap: React.FC<MapProps> = ({
         }
     }, [selectedRoutePoint])
 
-    useEffect(() => {
-        if (routePoints) {
-            setScopedMarker(routePoints.at(0));
-        }
-    },
-        [routePoints])
 
     useEffect(() => {
         if (scopedMarker) {
@@ -248,7 +241,6 @@ export const BaseMap: React.FC<MapProps> = ({
                 {view === "Route" && scopedMarker && routePoints && routePoints.length !== 0 && <div id="route-points">
                     {renderRoutePoints(
                         routePoints,
-                        setScopedMarker,
                         scopedMarker,
                         ROUTE_POINTER
                     )}
@@ -278,6 +270,7 @@ export const BaseMap: React.FC<MapProps> = ({
                         zIndex: 10,
                         color: "black"
                     }} onClick={() => {
+
                         setHistoryStack((prev: HistoryStack) => {
                             return pop([...prev])
                         })
