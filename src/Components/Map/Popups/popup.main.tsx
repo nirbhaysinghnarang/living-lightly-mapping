@@ -1,6 +1,6 @@
-import { ChannelContent, ChannelType } from "../../../Types/Channel.types";
-import { Box, Typography, Stack } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import { Popup } from "react-map-gl";
+import { ChannelContent, ChannelType } from "../../../Types/Channel.types";
 
 
 interface ChannelPopupProps {
@@ -25,15 +25,21 @@ export const ChannelPopup: React.FC<ChannelPopupProps> = ({ channel, fixed }: Ch
         </Stack>);
     }
 
+
     if (!channel) return;
-    if (!fixed) return (
-        <Popup anchor="top" closeOnClick={false}  closeButton={false} latitude={channel.lat} longitude={channel.long} offset={50} style={{ padding: 10 }}>
+    if (!fixed && channel.contents.length == 0) return (
+        <Popup anchor="top" closeOnClick={false}  closeButton={false} latitude={channel.lat} longitude={channel.long} offset={10} style={{ padding: 1 }}>
             {_renderContents()}
         </Popup>);
 
-    return <Popup closeOnClick={false} offset={50} closeButton={false}  latitude={channel.lat} longitude={channel.long} style={{ padding: 10, position: "absolute", top: 200, right: 100, maxWidth: 300, opacity: 1 }}>
+    if (!fixed) return (
+        <Popup anchor="top" closeOnClick={false}  closeButton={false} latitude={channel.contents[0].lat} longitude={channel.contents[0].long} offset={10} style={{ padding: 1 }}>
+            {_renderContents()}
+        </Popup>);
+
+    return <div style={{  position: "absolute", top: 100, left: 100, maxWidth: 300, opacity: 1, border: "1px dashed black", padding:"10px" }}>
         {_renderContents()}
-    </Popup>
+    </div>
 }
 
 

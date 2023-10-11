@@ -1,30 +1,28 @@
-import { MapProps } from "../../Types/MapProps";
-import React, { useRef, useEffect, useState } from 'react';
+import { MenuOutlined } from "@mui/icons-material";
 import { Box, Button, Typography } from '@mui/material';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { Map, Source, Layer } from 'react-map-gl';
-import { InsetMap } from "./map.inset.tsx";
-import {fetchData } from "./Functions/fetchData.ts";
+import React, { useEffect, useRef, useState } from 'react';
+import { Layer, Map, Marker, Source } from 'react-map-gl';
+import { BASE_MAP_BOUNDS } from "../../Constants/map.ts";
 import { ChannelContent, ChannelType } from "../../Types/Channel.types.ts";
-import { Menu as MapMenu } from "./map.menu.tsx";
-import { MenuOutlined } from "@mui/icons-material";
-import { panTo, renderRoutePoints } from "./map.utils.tsx";
-import { renderCommunities, renderRouteStartPoints } from "./map.utils.tsx";
+import { HistoryStack, HistoryStackElement, append, initialStackElement, peek, pop } from "../../Types/History.stack.type.ts";
+import { MapProps } from "../../Types/MapProps";
+import { Overlay } from "../../Types/Overlay.type.ts";
+import { State, constructStates } from "../../Types/State.type.ts";
+import { VIEWMODE } from "../../Types/ViewMode.type.ts";
+import { setBounds, updateScrollBehaviour, updateState } from "../State/map.state.handler.ts";
+import { handleClickStateLevel } from "./Events/handleClick.ts";
+import { cycle } from "./Functions/cycle.ts";
+import { fetchData } from "./Functions/fetchData.ts";
+import { createPolygonLayer } from "./Geometry/drawStates.ts";
+import { getZoomLevel } from "./Geometry/getZoomLevel.ts";
 import { createLineGeoJson } from "./Geometry/lineGeoJson.ts";
 import { createLayer } from "./Geometry/routeLayer.ts";
-import { Cycle } from "./map.cycle.tsx";
-import { cycle } from "./Functions/cycle.ts";
-import { createPolygonLayer } from "./Geometry/drawStates.ts";
-import { State, constructStates } from "../../Types/State.type.ts";
-import { getZoomLevel } from "./Geometry/getZoomLevel.ts";
-import { handleClickStateLevel } from "./Events/handleClick.ts";
-import { HistoryStack, HistoryStackElement, append, peek, pop, initialStackElement } from "../../Types/History.stack.type.ts";
-import { VIEWMODE } from "../../Types/ViewMode.type.ts";
 import { ChannelPopup, ContentPopup } from "./Popups/popup.main.tsx";
-import { Overlay } from "../../Types/Overlay.type.ts";
-import { Marker } from "react-map-gl";
-import { setBounds, updateState } from "../State/map.state.handler.ts";
-import { BASE_MAP_BOUNDS } from "../../Constants/map.ts";
+import { Cycle } from "./map.cycle.tsx";
+import { InsetMap } from "./map.inset.tsx";
+import { Menu as MapMenu } from "./map.menu.tsx";
+import { panTo, renderCommunities, renderRoutePoints, renderRouteStartPoints } from "./map.utils.tsx";
 
 export const BaseMap: React.FC<MapProps> = ({
     assetList,
@@ -81,6 +79,7 @@ export const BaseMap: React.FC<MapProps> = ({
         if (historyStack && historyStack.length > 1) {
             const stackTop = peek(historyStack)
             setView(stackTop.view)
+            updateScrollBehaviour(stackTop, mapRef)
             setBounds(stackTop, mapRef, setOverlays)
             updateState(
                 stackTop,
@@ -117,6 +116,7 @@ export const BaseMap: React.FC<MapProps> = ({
     }, [communities])
 
     useEffect(() => {
+        console.log(selectedCommunity)
         if (selectedCommunity && peek(historyStack).selectedElement !== selectedCommunity) {
             setHistoryStack((prevStack: HistoryStack) => {
                 return append([...prevStack],
@@ -239,10 +239,16 @@ export const BaseMap: React.FC<MapProps> = ({
 
 
                 {view === "Route" && scopedMarker && routePoints && routePoints.length !== 0 && <div id="route-points">
+                    
+
+
+
+
                     {renderRoutePoints(
                         routePoints,
                         scopedMarker,
-                        ROUTE_POINTER
+                        ROUTE_POINTER,
+                        setScopedMarker
                     )}
                     <Source id="routes" type="geojson" data={createLineGeoJson(routePoints)}>
                         {<Layer {...createLayer()}></Layer>}

@@ -1,9 +1,8 @@
-import { Marker } from 'react-map-gl';
-import React, { ReactNode } from "react";
 import { Box, Typography } from "@mui/material";
-import { ChannelContent, ChannelType } from "../../Types/Channel.types";
+import React, { ReactNode } from "react";
+import { MapRef, Marker } from 'react-map-gl';
 import { Asset } from '../../Types/Asset.type';
-import { MapRef } from "react-map-gl";
+import { ChannelContent, ChannelType } from "../../Types/Channel.types";
 
 export const panTo = (coords: [number, number], zoom: number, mapRef: React.RefObject<MapRef>) => {
     if (mapRef.current) {
@@ -93,11 +92,11 @@ export function renderRouteStartPoints(
         </div>);
 }
 
-export function renderRoutePoints(routePoints: ChannelContent[], scopedMarker: ChannelContent, image: Asset): ReactNode {
+export function renderRoutePoints(routePoints: ChannelContent[], scopedMarker: ChannelContent, image: Asset, setScopedMarker: (marker: React.SetStateAction<ChannelContent>) => void): ReactNode {
     return (
         <>
             {routePoints.map((marker: ChannelContent) => (
-                <div key={marker.id}>
+                <div key={marker.id} onClick={(e)=>{setScopedMarker(marker)}}>
                     <Marker
                         longitude={marker.long}
                         latitude={marker.lat}
