@@ -9,6 +9,10 @@ body {
 }
 
 
+:root {
+  --popup-background-color: #fff; /* Default color */
+}
+
 @font-face {
   font-family: "BriemScript";
   src: local("BriemScript"),
@@ -22,3 +26,9 @@ body {
  }
 
  
+ .mapboxgl-popup-content{
+  background-color: var(--popup-background-color);
+ }
+ .mapboxgl-popup-anchor-top .mapboxgl-popup-tip{
+  border-bottom-color:  var(--popup-background-color); 
+ }

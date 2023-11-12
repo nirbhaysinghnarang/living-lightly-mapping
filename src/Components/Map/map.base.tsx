@@ -269,7 +269,7 @@ export const BaseMap: React.FC<MapProps> = ({
                         setSelectedCommunity,
                         setHoverCommunity
                     )}
-                    {hoverCommunity && <ChannelPopup isOpen={isChannelPopupOpen} handleClose={setIsChannelPopupOpen} channel={hoverCommunity} fixed={false}></ChannelPopup>}
+                    {hoverCommunity && <ChannelPopup color={idColorMap[hoverCommunity.uniqueID]} isOpen={isChannelPopupOpen} handleClose={setIsChannelPopupOpen} channel={hoverCommunity} fixed={false}></ChannelPopup>}
                 </div>
                 }
                 {view === "State" && states && states.map((state: State) => {
@@ -286,8 +286,8 @@ export const BaseMap: React.FC<MapProps> = ({
                         setHoverRoute,
                         routes,
                     )}
-                    {selectedCommunity && <ChannelPopup isOpen={isChannelPopupOpen} handleClose={setIsChannelPopupOpen} channel={selectedCommunity} fixed={true}></ChannelPopup>}
-                    {hoverRoute && <ChannelPopup isOpen={isChannelPopupOpen} handleClose={setIsChannelPopupOpen} channel={hoverRoute} fixed={false}></ChannelPopup>}
+                    {selectedCommunity && <ChannelPopup color={idColorMap[selectedCommunity.uniqueID]}isOpen={isChannelPopupOpen} handleClose={setIsChannelPopupOpen} channel={selectedCommunity} fixed={true}></ChannelPopup>}
+                    {hoverRoute && <ChannelPopup color={idColorMap[hoverRoute.uniqueID]} isOpen={isChannelPopupOpen} handleClose={setIsChannelPopupOpen} channel={hoverRoute} fixed={false}></ChannelPopup>}
                     {hoverRoute && hoverRoutePoints && <Source id="routes" type="geojson" data={createLineGeoJson(hoverRoutePoints)}>
                         {<Layer {...createLayer(idColorMap[hoverCommunity.uniqueID])}></Layer>}
                     </Source>}
@@ -297,7 +297,7 @@ export const BaseMap: React.FC<MapProps> = ({
                 {view === "Route" && scopedMarker && routePoints && routePoints.length !== 0 && <div id="route-points">
 
 
-                    {<ChannelPopup fixed={true} isOpen={isChannelPopupOpen} handleClose={setIsChannelPopupOpen} channel={scopedCommunity}></ChannelPopup>}
+                    {<ChannelPopup color={idColorMap[scopedCommunity.uniqueID]} fixed={true} isOpen={isChannelPopupOpen} handleClose={setIsChannelPopupOpen} channel={scopedCommunity}></ChannelPopup>}
 
 
                     {renderRoutePoints(

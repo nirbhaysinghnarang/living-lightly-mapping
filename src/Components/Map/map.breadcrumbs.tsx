@@ -21,7 +21,7 @@ export const MapBreadCrumbs:React.FC<MapBreadCrumbsProps> = ({history}:MapBreadC
             return route.name
         }
     }
-    return <Breadcrumbs sx={{padding:'10px'}} separator={<NavigateNext fontSize="small" />}>
+    return <Breadcrumbs sx={{padding:'10px', background:"#f6f6f2"}} separator={<NavigateNext fontSize="small" />}>
         {history.map((elem,index)=>{
             return <Typography sx={{fontFamily:"Source Serif", color:"black", fontStyle:"italic"}}>{getDisplayNameFromElement(elem, index)}</Typography>
         })}
