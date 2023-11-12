@@ -9,7 +9,8 @@ interface ChannelPopupProps {
     fixed: boolean,
     isOpen: boolean,
     color:string,
-    handleClose: (b: boolean) => void
+    handleClose: (b: boolean) => void,
+    isFromHover:boolean
 }
 
 interface ContentPopupProps {
@@ -19,7 +20,7 @@ interface ContentPopupProps {
     onClose: (b: boolean) => void
 }
 
-export const ChannelPopup: React.FC<ChannelPopupProps> = ({ channel, fixed, isOpen, handleClose, color }: ChannelPopupProps) => {
+export const ChannelPopup: React.FC<ChannelPopupProps> = ({ channel, fixed, isOpen, handleClose, color, isFromHover }: ChannelPopupProps) => {
     document.documentElement.style.setProperty('--popup-background-color', color); // Replace 'yourColor' with the desired color
     if (!isOpen) return <></>
     function _renderContents() {
@@ -29,7 +30,7 @@ export const ChannelPopup: React.FC<ChannelPopupProps> = ({ channel, fixed, isOp
                 <Typography color="white"variant="body1" sx={{ fontFamily: "Source Serif", color: "white", fontSize: "18px", }}>
                     {channel.name}
                 </Typography>
-                {!fixed && <Button onClick={() => { handleClose(false) }}>
+                {!fixed && !isFromHover && <Button onClick={() => { handleClose(false) }}>
                     <Cancel sx={{ color: "white" }}></Cancel>
                 </Button>}
             </Stack>
