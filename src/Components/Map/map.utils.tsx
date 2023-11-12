@@ -25,7 +25,7 @@ export function renderCommunities(
     setHoverCommunity: (community: ChannelType) => void):
     ReactNode {
     return (<>
-        {communities && communities.length !== 0 && communities.map((community: ChannelType) => {
+        {communities && communities.length !== 0 && communities.map((community: ChannelType, index:number) => {
             return (<>
                 <Box>
                     <Marker
@@ -63,7 +63,9 @@ export function renderRouteStartPoints(
     setSelectedRoute: (routeStartPoint: ChannelContent) => void,
     image: Asset,
     setHoverItem: (route: ChannelType) => void,
-    routes: ChannelType[]): ReactNode {
+    routes: ChannelType[]
+    
+    ): ReactNode {
     return (
         <div>
             {routeStartPoints && routeStartPoints.length !== 0 &&
@@ -92,7 +94,7 @@ export function renderRouteStartPoints(
         </div>);
 }
 
-export function renderRoutePoints(routePoints: ChannelContent[], scopedMarker: ChannelContent, image: Asset, setScopedMarker: (marker: React.SetStateAction<ChannelContent>) => void): ReactNode {
+export function renderRoutePoints(routePoints: ChannelContent[], scopedMarker: ChannelContent, image: Asset, setScopedMarker: (marker: React.SetStateAction<ChannelContent>) => void, color:string): ReactNode {
     return (
         <>
             {routePoints.map((marker: ChannelContent) => (
@@ -111,13 +113,13 @@ export function renderRoutePoints(routePoints: ChannelContent[], scopedMarker: C
                     >
                         {(scopedMarker.id === marker.id) ? (
                             <>
-                                <img src={image.url} style={{ margin: 'auto', width: '30px', height: '40px' }} /> {/* Apply native styles */}
-                                <p style={{ fontFamily: 'BriemScript', color: '#894E35', fontSize: '20px', fontWeight: 700 }}>{marker.title}</p> {/* Apply native styles */}
+                                <img src={image.url} style={{ margin: 'auto', width: '30px', }} /> {/* Apply native styles */}
+                                <p style={{ fontFamily: 'Source Serif', color: color, fontSize: '20px', fontWeight: 700 }}>{marker.title}</p> {/* Apply native styles */}
                             </>
                         ) : (
                             <>
-                                <img src={image.url} style={{ margin: 'auto', width: '20px', height: '30px' }} /> {/* Apply native styles */}
-                                <p style={{ fontFamily: 'BriemScript', color: '#894E35', fontSize: '18px' }}>{marker.title}</p>
+                                <img src={image.url} style={{ margin: 'auto', width: '20px',}} /> {/* Apply native styles */}
+                                <p style={{ fontFamily: 'Source Serif', color: color, fontSize: '18px' }}>{marker.title}</p>
                             </>
                         )}
                     </Marker>

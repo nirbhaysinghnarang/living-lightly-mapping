@@ -54,7 +54,6 @@ export function updateScrollBehaviour(
     mapRef: React.RefObject<MapRef>) {
     const typeOfTop: selectedElementString = getType(element.selectedElement)
     if(!mapRef.current || !mapRef.current.scrollZoom) return
-    console.log(typeOfTop)
     if(typeOfTop === 'ChannelContent'){
         //Want to enable scrolling for content elements only.
         if(!mapRef.current.scrollZoom.isEnabled) {
@@ -63,7 +62,6 @@ export function updateScrollBehaviour(
             mapRef.current.setMaxZoom(16);
         }
     }else{
-        console.log(mapRef.current.scrollZoom)
         if(mapRef.current.scrollZoom.isEnabled) mapRef.current.scrollZoom.disable()
     }
 
@@ -81,6 +79,7 @@ export function updateState(
     setOverlays: (overlays: Overlay[]) => void,
     setRoutes: (routes: ChannelType[]) => void,
     setView: (view: VIEWMODE) => void,
+
     routes: ChannelType[]
 ) {
     setView(element.view)

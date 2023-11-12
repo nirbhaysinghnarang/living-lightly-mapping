@@ -54,7 +54,22 @@ export const CONSTANT_ASSETS: Asset[] = [
     },
     {
         id: "ROUTE_IMG",
-        url: "url(/Assets/route.png)"
+        url: "(/Assets/route.png)"
+    },{
+        id:"ROUTE_1",
+        url: "/Assets/Images/route_1.png"
+    },
+    {
+        id:"ROUTE_1_SEL",
+        url: "/Assets/Images/route_1_selected.png"
+    },
+    {
+        id:"ROUTE_2",
+        url: "/Assets/Images/route_2.png"
+    },
+    {
+        id:"ROUTE_2_SEL",
+        url: "/Assets/Images/route_2_selected.png"
     }
 ];
 

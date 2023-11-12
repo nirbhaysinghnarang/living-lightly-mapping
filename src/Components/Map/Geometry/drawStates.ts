@@ -1,7 +1,7 @@
-import {geoContains} from 'd3-geo';
+import { geoContains } from 'd3-geo';
+import { FillLayer } from "mapbox-gl";
+import json from '../../../Constants/Data/states_geojson.constants.json';
 import { ChannelType } from "../../../Types/Channel.types";
-import json from '../../../Constants/Data/states_geojson.constants.json'
-import { LineLayer, } from "mapbox-gl";
 
 
 export function getStatesJson(communities:ChannelType[]):Record<string, any>[]{
@@ -16,17 +16,12 @@ export function getStateJson(community:ChannelType): Record<string,any> {
     return obj
 }
 
-export function createPolygonLayer():LineLayer{
+export function createPolygonLayer():FillLayer{
     return {
         id: 'states',
-        type: 'line',
+        type: 'fill',
         source: 'routes',
-        layout: {
-            'line-join': 'round',
-            'line-cap': 'round'
-        },
         paint: {
-            'line-color': '#4F311C',
-            'line-width': 2
-        }
+            "fill-color":"#BE8F2F"
+        },
 }}

@@ -1,6 +1,6 @@
-import { FillLayer, LineLayer, } from "mapbox-gl";
+import { LineLayer } from "mapbox-gl";
 
-export function createLayer():LineLayer {
+export function createLayer(color:string|undefined):LineLayer {
     return {
         id: 'routes',
         type: 'line',
@@ -10,8 +10,9 @@ export function createLayer():LineLayer {
             'line-cap': 'round'
         },
         paint: {
-            'line-color': '#4F311C',
-            'line-width': 2
+            'line-color': typeof color === 'undefined' ? '#4F311C' : color,
+            'line-width': 2,
+            'line-dasharray': [1, 2]
         }
     };
 

@@ -1,7 +1,6 @@
-import { ChannelContent } from "../../../Types/Channel.types";
 import bezierSpline from '@turf/bezier-spline';
-import {lineString } from "@turf/helpers";
-
+import { lineString } from "@turf/helpers";
+import { ChannelContent } from "../../../Types/Channel.types";
 export function createLineGeoJson(route_markers:ChannelContent[]) {
     const geometry = bezierSpline(
         lineString(
@@ -12,6 +11,7 @@ export function createLineGeoJson(route_markers:ChannelContent[]) {
     return {
         'id': 'routes',
         'type': 'Feature',
+        
         ...geometry
     };
 }
