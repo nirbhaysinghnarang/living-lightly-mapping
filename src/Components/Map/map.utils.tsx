@@ -44,7 +44,7 @@ export function renderCommunities(
                                 e.stopPropagation()
                                 setHoverCommunity(null)
                             }}
-                        > <Typography variant='h5' fontFamily={'BriemScript'}>{(community.name)}</Typography> </div>
+                        > <Typography variant='h5' fontFamily={'Source Serif'}>{(community.name)}</Typography> </div>
                     </Marker>
                 </Box>);
             </>);
