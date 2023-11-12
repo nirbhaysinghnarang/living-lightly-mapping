@@ -67,6 +67,10 @@ export const BaseMap: React.FC<MapProps> = ({
     const [hoverRoutePoints, setHoverRoutePoints] = useState<ChannelContent[]>(null);
     const [overlays, setOverlays] = useState<Overlay[]>([]);
     const [idColorMap, setIdColorMap] = useState<any>();
+
+    const [isContentPopupOpen, setIsContentPopupOpen] = useState<boolean>(false);
+    const [isChannelPopupOpen, setIsChannelPopupOpen] = useState<boolean>(false);
+
     const [historyStack, setHistoryStack] = useState<HistoryStack>([
         initialStackElement
     ]);
@@ -80,9 +84,9 @@ export const BaseMap: React.FC<MapProps> = ({
      */
     const [showMenu, setShowMenu] = useState(false);
     const [zoom, setZoom] = useState(getZoomLevel(view))
+    
 
-
-    useEffect(() => { if (hoverCommunity && typeof (hoverRoute) !== "undefined") { setHoverRoutePoints(hoverRoute.contents) } }, [hoverRoute])
+    useEffect(() => { if (hoverCommunity && typeof (hoverRoute) !== "undefined") { setHoverRoutePoints(hoverRoute.contents); setIsChannelPopupOpen(true) } }, [hoverRoute])
 
     /**
      * useEffect Hooks
@@ -151,6 +155,7 @@ export const BaseMap: React.FC<MapProps> = ({
 
     useEffect(() => {
         if (selectedCommunity && peek(historyStack).selectedElement !== selectedCommunity) {
+            setIsChannelPopupOpen(true)
             setHistoryStack((prevStack: HistoryStack) => {
                 return append([...prevStack],
                     {
@@ -177,7 +182,7 @@ export const BaseMap: React.FC<MapProps> = ({
     }, [selectedRoutePoint])
 
 
-    
+    useEffect(()=> {if(hoverCommunity) setIsChannelPopupOpen(true)})
 
 
     
@@ -188,6 +193,7 @@ export const BaseMap: React.FC<MapProps> = ({
 
     useEffect(() => {
         if (scopedMarker) {
+            setIsContentPopupOpen(true)
             panTo(
                 [scopedMarker.long, scopedMarker.lat],
                 getZoomLevel("Route"),
@@ -254,10 +260,10 @@ export const BaseMap: React.FC<MapProps> = ({
                         setSelectedCommunity,
                         setHoverCommunity
                     )}
-                    {hoverCommunity && <ChannelPopup channel={hoverCommunity} fixed={false}></ChannelPopup>}
+                    {hoverCommunity && <ChannelPopup isOpen={isChannelPopupOpen} handleClose={setIsChannelPopupOpen} channel={hoverCommunity} fixed={false}></ChannelPopup>}
                 </div>
                 }
-                {view == "State" && states && states.map((state: State) => {
+                {view === "State" && states && states.map((state: State) => {
                     return <Source id={"state"} type="geojson" data={state.features} >
                         <Layer id={state.name} {...createPolygonLayer()} />
                     </Source>
@@ -271,8 +277,8 @@ export const BaseMap: React.FC<MapProps> = ({
                         setHoverRoute,
                         routes,
                     )}
-                    {selectedCommunity && <ChannelPopup channel={selectedCommunity} fixed={true}></ChannelPopup>}
-                    {hoverRoute && <ChannelPopup channel={hoverRoute} fixed={false}></ChannelPopup>}
+                    {selectedCommunity && <ChannelPopup isOpen={isChannelPopupOpen} handleClose={setIsChannelPopupOpen} channel={selectedCommunity} fixed={true}></ChannelPopup>}
+                    {hoverRoute && <ChannelPopup isOpen={isChannelPopupOpen} handleClose={setIsChannelPopupOpen} channel={hoverRoute} fixed={false}></ChannelPopup>}
                     {hoverRoute && hoverRoutePoints && <Source id="routes" type="geojson" data={createLineGeoJson(hoverRoutePoints)}>
                         {<Layer {...createLayer(idColorMap[hoverCommunity.uniqueID])}></Layer>}
                     </Source>}
@@ -290,7 +296,8 @@ export const BaseMap: React.FC<MapProps> = ({
                         scopedMarker,
                         idColorMap[routePoints[0].id] === COLORS[0] ? routeAssets[0]  : routeAssets[1],
                         setScopedMarker,
-                        idColorMap[routePoints[0].id]
+                        idColorMap[routePoints[0].id],
+                        setIsContentPopupOpen
                     )}
                     <Source id="routes" type="geojson" data={createLineGeoJson(routePoints)}>
                         {<Layer {...createLayer(idColorMap[routePoints[0].id])}></Layer>}
@@ -305,7 +312,7 @@ export const BaseMap: React.FC<MapProps> = ({
                             setScopedMarker(cycle(scopedMarker, routePoints, "DOWN"))
                         }}
                     />
-                    {scopedMarker && <ContentPopup content={scopedMarker} ></ContentPopup>}
+                    {scopedMarker && <ContentPopup isOpen={isContentPopupOpen} onClose={setIsContentPopupOpen} content={scopedMarker} ></ContentPopup>}
                 </div>}
 
 

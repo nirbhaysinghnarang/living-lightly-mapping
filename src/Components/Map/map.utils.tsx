@@ -94,11 +94,13 @@ export function renderRouteStartPoints(
         </div>);
 }
 
-export function renderRoutePoints(routePoints: ChannelContent[], scopedMarker: ChannelContent, image: Asset, setScopedMarker: (marker: React.SetStateAction<ChannelContent>) => void, color:string): ReactNode {
+export function renderRoutePoints(routePoints: ChannelContent[], scopedMarker: ChannelContent, image: Asset, setScopedMarker: (marker: React.SetStateAction<ChannelContent>) => void, color:string,
+    setIsContentPopupOpen:(b:boolean)=>void
+): ReactNode {
     return (
         <>
             {routePoints.map((marker: ChannelContent) => (
-                <div key={marker.id} onClick={(e)=>{setScopedMarker(marker)}}>
+                <div key={marker.id} onClick={(e)=>{setScopedMarker(marker); setIsContentPopupOpen(true)}}>
                     <Marker
                         longitude={marker.long}
                         latitude={marker.lat}
