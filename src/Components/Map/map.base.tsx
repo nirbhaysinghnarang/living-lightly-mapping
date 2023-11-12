@@ -36,7 +36,6 @@ export const BaseMap: React.FC<MapProps> = ({
 }: MapProps) => {
 
     const MAP_OVERLAY_ASSET = assetList.find(elem => elem.id == "MAP_OVERLAY_ASSET")
-    const ROUTE_POINTER = assetList.find(elem => elem.id == "ROUTE_POINTER_IMG")
     const ARROW_PREV = assetList.find(elem => elem.id === "ARROW_PREV_IMG")
     const ARROW_NEXT = assetList.find(elem => elem.id === "ARROW_NEXT_IMG")
     const mapRef = useRef(null);
@@ -70,6 +69,9 @@ export const BaseMap: React.FC<MapProps> = ({
 
     const [isContentPopupOpen, setIsContentPopupOpen] = useState<boolean>(false);
     const [isChannelPopupOpen, setIsChannelPopupOpen] = useState<boolean>(false);
+
+
+    const [scopedCommunity, setScopedCommunity] = useState<null|ChannelType>(null);
 
     const [historyStack, setHistoryStack] = useState<HistoryStack>([
         initialStackElement
@@ -112,6 +114,13 @@ export const BaseMap: React.FC<MapProps> = ({
                 setView,
                 routes
             )
+            if(stackTop.view === 'Route'){
+                const routePoint = stackTop.selectedElement as ChannelContent
+                const community = (historyStack[historyStack.length-2].selectedElement as ChannelType)
+                const route = community.children.find(route=>route.contents[0].id === routePoint.id)
+                setScopedCommunity(route)
+                setIsChannelPopupOpen(true)
+            }
         } else {
             panTo([mapCenter.lng, mapCenter.lat], getZoomLevel("State"), mapRef)
             setView("State")
@@ -288,7 +297,7 @@ export const BaseMap: React.FC<MapProps> = ({
                 {view === "Route" && scopedMarker && routePoints && routePoints.length !== 0 && <div id="route-points">
 
 
-
+                    {<ChannelPopup fixed={true} isOpen={isChannelPopupOpen} handleClose={setIsChannelPopupOpen} channel={scopedCommunity}></ChannelPopup>}
 
 
                     {renderRoutePoints(

@@ -49,7 +49,7 @@ export const ChannelPopup: React.FC<ChannelPopupProps> = ({ channel, fixed, isOp
             {_renderContents()}
         </Popup>);
 
-    return <Card style={{ position: "absolute", top: 500, left: 100, maxWidth: 300, opacity: 1, padding: "10px", backgroundColor: "#f6f6f2" }}>
+    return <Card style={{ position: "absolute", top: 300, left: "80px", maxWidth: 300, opacity: 1, padding: "10px", backgroundColor: "#f6f6f2" }}>
         {_renderContents()}
     </Card>
 }
