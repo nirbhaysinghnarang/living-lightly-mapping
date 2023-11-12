@@ -263,10 +263,10 @@ export const BaseMap: React.FC<MapProps> = ({
 
                 }}
             >
-                {states && <Box sx={{ position: 'absolute', top: "50px", left: "80px", zIndex: 10 }}>
+                {states && idColorMap && <Box sx={{ position: 'absolute', top: "50px", left: "80px", zIndex: 10 }}>
                     <div>
 
-                        <DynMenu history={historyStack} topOfStack={peek(historyStack)} states={states} />
+                        <DynMenu idColorMap={idColorMap }history={historyStack} topOfStack={peek(historyStack)} states={states} />
                     </div>
                 </Box>}
                 {hasInset && <InsetMap
