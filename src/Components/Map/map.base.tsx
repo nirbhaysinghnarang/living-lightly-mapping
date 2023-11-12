@@ -1,4 +1,3 @@
-import { MenuOutlined } from "@mui/icons-material";
 import { Box, Button, Typography } from '@mui/material';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import React, { useEffect, useRef, useState } from 'react';
@@ -22,8 +21,8 @@ import { createLayer } from "./Geometry/routeLayer.ts";
 import { ChannelPopup, ContentPopup } from "./Popups/popup.main.tsx";
 import { MapBreadCrumbs } from "./map.breadcrumbs.tsx";
 import { Cycle } from "./map.cycle.tsx";
+import { DynMenu } from "./map.dyn.menu.tsx";
 import { InsetMap } from "./map.inset.tsx";
-import { Menu as MapMenu } from "./map.menu.tsx";
 import { panTo, renderCommunities, renderRoutePoints, renderRouteStartPoints } from "./map.utils.tsx";
 
 export const BaseMap: React.FC<MapProps> = ({
@@ -232,14 +231,12 @@ export const BaseMap: React.FC<MapProps> = ({
 
                 }}
             >
-                <Box sx={{ position: 'absolute', top: "50px", left: "80px", zIndex: 10 }}>
+                {states && <Box sx={{ position: 'absolute', top: "50px", left: "80px", zIndex: 10 }}>
                     <div>
-                        <div className={'flex justify-start items-center gap-5'}>
-                            <div onClick={() => { setShowMenu(!showMenu) }}> <MenuOutlined /> </div>
-                        </div>
-                        {showMenu && <MapMenu selectCommunity={setSelectedCommunity} communities={communities} />}
+                       
+                      <DynMenu history={historyStack} topOfStack={peek(historyStack)}  states={states}/>
                     </div>
-                </Box>
+                </Box>}
                 {hasInset && <InsetMap
                     channelId={insetMapProps!.channelId}
                     hasInset={false}
