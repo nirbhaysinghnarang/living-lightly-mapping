@@ -1,6 +1,6 @@
+import { BASE_MAP_ASSETS, BASE_MAP_BOUNDS, BASE_MAP_CENTER, BASE_MAP_INIT_ZOOM } from "../../Constants/map.ts";
 import { ENV_VARS } from "../../Helpers/env";
 import { MapProps } from "../../Types/MapProps";
-import { BASE_MAP_ASSETS, BASE_MAP_BOUNDS, BASE_MAP_CENTER, BASE_MAP_HAS_INSET_MAP, BASE_MAP_INIT_ZOOM, BASE_MAP_ZOOM_MIN_MAX } from "../../Constants/map.ts";
 
 export function buildBaseMapProps(): MapProps {
     return {
@@ -15,7 +15,7 @@ export function buildBaseMapProps(): MapProps {
             channelId:null,
             hasInset:false,
             assetList:[],
-            mapZoom:BASE_MAP_INIT_ZOOM,
+            mapZoom:1,
             mapCenter:BASE_MAP_CENTER,
             mapBounds:BASE_MAP_BOUNDS,
             mapStyle:ENV_VARS["INSET_MAPBOX_STYLE"]!,

@@ -1,4 +1,4 @@
-import { ChannelType, ChannelContent } from "./Channel.types"
+import { ChannelContent, ChannelType } from "./Channel.types"
 import { State } from "./State.type"
 import { VIEWMODE } from "./ViewMode.type"
 /**
@@ -36,6 +36,6 @@ export function peek(stack:HistoryStack):HistoryStackElement{
 }
 
 export const initialStackElement:HistoryStackElement = {
-    view:"State",
+    view:"IND",
     selectedElement: null
 }

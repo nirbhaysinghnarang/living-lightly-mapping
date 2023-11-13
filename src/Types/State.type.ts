@@ -1,10 +1,11 @@
-import { ChannelType } from "./Channel.types"
-import { getBounds } from "../Components/Map/Geometry/getBounds";
-import { getStatesJson } from "../Components/Map/Geometry/drawStates"
+import { Feature, Point, Polygon, center } from "@turf/turf";
 import { geoContains } from 'd3-geo';
-import { Feature, Polygon, Point, center } from "@turf/turf";
+import { getStatesJson } from "../Components/Map/Geometry/drawStates";
+import { getBounds } from "../Components/Map/Geometry/getBounds";
 import { BASE_MAP_BOUNDS } from "../Constants/map";
 import { BoxBound, MapBounds, get2DBounds, getBoundsFromBox } from "./Bounds.type";
+import { ChannelType } from "./Channel.types";
+
 
 export type State = {
     name: string,
@@ -63,4 +64,16 @@ export function getStateBounds(state:State): BoxBound{
 
    return  get2DBounds(stateBounds)
 
+}
+
+export function getNestedRoutes(state:State):ChannelType[]{
+    if(!state || !state.communities || !state.communities.length) return []
+    function recurse(community:ChannelType, routes:ChannelType[]){
+        if(!community.children && !community.contents) return routes;
+        if(community.contents.length!==0) routes.push(community)
+        if(community.children) community.children.forEach(subcomm=> recurse(subcomm, routes))
+    }
+    let routes:ChannelType[]= []
+    for(const community of state.communities) recurse(community, routes)
+    return routes
 }

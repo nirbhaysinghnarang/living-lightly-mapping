@@ -1,9 +1,12 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
 import React, { ReactNode } from "react";
-import { MapRef, Marker } from 'react-map-gl';
+import { Layer, MapRef, Marker, Source } from 'react-map-gl';
 import { Asset } from '../../Types/Asset.type';
 import { ChannelContent, ChannelType } from "../../Types/Channel.types";
-
+import { State, getNestedRoutes } from "../../Types/State.type";
+import { createLineGeoJson } from "./Geometry/lineGeoJson";
+import { createLayer } from "./Geometry/routeLayer";
+import { CommunityPopup } from "./Popups/popup.main";
 export const panTo = (coords: [number, number], zoom: number, mapRef: React.RefObject<MapRef>) => {
     if (mapRef.current) {
         mapRef.current.flyTo(
@@ -25,13 +28,13 @@ export function renderCommunities(
     setHoverCommunity: (community: ChannelType) => void):
     ReactNode {
     return (<>
-        {communities && communities.length !== 0 && communities.map((community: ChannelType, index:number) => {
+        {communities && communities.length !== 0 && communities.map((community: ChannelType, index: number) => {
             return (<>
                 <Box>
                     <Marker
                         longitude={community.long}
                         latitude={community.lat}
-                        style={{zIndex:10}}
+                        style={{ zIndex: 10 }}
                     >
                         <div onClick={(e) => {
                             setSelectedCommunity(community);
@@ -57,15 +60,14 @@ export function renderCommunities(
 
 
 }
-
 export function renderRouteStartPoints(
     routeStartPoints: ChannelContent[],
     setSelectedRoute: (routeStartPoint: ChannelContent) => void,
     image: Asset,
     setHoverItem: (route: ChannelType) => void,
     routes: ChannelType[]
-    
-    ): ReactNode {
+
+): ReactNode {
     return (
         <div>
             {routeStartPoints && routeStartPoints.length !== 0 &&
@@ -74,7 +76,7 @@ export function renderRouteStartPoints(
                     return (
                         <>
                             <Marker
-                                style={{zIndex:10}}
+                                style={{ zIndex: 10 }}
                                 key={marker.id}
                                 longitude={marker.long}
                                 latitude={marker.lat}>
@@ -93,21 +95,21 @@ export function renderRouteStartPoints(
                 })}
         </div>);
 }
-
-export function renderRoutePoints(routePoints: ChannelContent[], scopedMarker: ChannelContent, image: Asset, setScopedMarker: (marker: React.SetStateAction<ChannelContent>) => void, color:string,
-    setIsContentPopupOpen:(b:boolean)=>void
+export function renderRoutePoints(routePoints: ChannelContent[], scopedMarker: ChannelContent, image: Asset, setScopedMarker: (marker: React.SetStateAction<ChannelContent>) => void, color: string,
+    setIsContentPopupOpen: (b: boolean) => void
 ): ReactNode {
     return (
         <>
-            {routePoints.map((marker: ChannelContent) => (
-                <div key={marker.id} onClick={(e)=>{setScopedMarker(marker); setIsContentPopupOpen(true)}}>
+            {routePoints.map((marker: ChannelContent) => {
+                console.log(marker, scopedMarker)
+                return <div key={marker.id} onClick={(e) => { setScopedMarker(marker); setIsContentPopupOpen(true) }}>
                     <Marker
                         longitude={marker.long}
                         latitude={marker.lat}
-                        
+
                         style={{
                             cursor: 'pointer',
-                            zIndex:10,
+                            zIndex: 10,
                             display: 'flex',
                             flexDirection: 'column',
                             justifyContent: 'center',
@@ -120,17 +122,117 @@ export function renderRoutePoints(routePoints: ChannelContent[], scopedMarker: C
                             </>
                         ) : (
                             <>
-                                <img src={image.url} style={{ margin: 'auto', width: '20px',}} /> {/* Apply native styles */}
+                                <img src={image.url} style={{ margin: 'auto', width: '20px', }} /> {/* Apply native styles */}
                                 <p style={{ fontFamily: 'Source Serif', color: color, fontSize: '18px' }}>{marker.title}</p>
                             </>
                         )}
                     </Marker>
                 </div>
-            ))}
+            }
+
+            )}
 
 
 
         </>
     );
 }
+function renderRoutes(
+    routes: ChannelType[],
+    idColorMap: Record<string, string>,
+    routeAssets: Asset[],
+    routeAssetsSelected: Asset[],
+    setHoverRoute: (route: ChannelType) => void,
+    displayPopup: (show: boolean) => void,
+    setSelectedRoute: (route: ChannelType) => void
+): ReactNode {
 
+    return routes.map(route => {
+        const image: Asset = idColorMap[route.uniqueID] === '#4ab975' ? routeAssets[0] : routeAssets[1];
+        const imageHighlighted: Asset = idColorMap[route.uniqueID] === '#4ab975' ? routeAssetsSelected[0] : routeAssetsSelected[1];
+        return route.contents.map((marker: ChannelContent, index: number) => {
+            return <div key={marker.id} >
+                <Marker
+                    longitude={marker.long}
+                    latitude={marker.lat}
+                    style={{
+                        cursor: 'pointer',
+                        zIndex: 10,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                    }}
+                >
+                    {index === 0 &&
+
+                    <Stack direction="column" alignContent={"center"} justifyContent={"center"}>
+                        <Button variant="contained" sx={{backgroundColor:idColorMap[route.uniqueID],
+                        ':hover': {
+                            bgcolor: idColorMap[route.uniqueID], // theme.palette.primary.main
+                            scale:1.6,
+                            transition: 'scale 1s'
+                          }}}
+                             onMouseEnter={() => { setHoverRoute(route); displayPopup(true) }}
+                             onMouseLeave={() => { setHoverRoute(null); displayPopup(false) }}
+                             onClick={() => { console.log("clicked"); setSelectedRoute(route) }}
+                             
+                        >
+                            <Typography variant="body1" sx={{color:'white', fontFamily:"Source Serif"}}></Typography>
+                            Start here
+                            </Button>
+                       
+                    </Stack>
+                       
+                    }
+                    {index !== 0 && <div >
+                        <img src={image.url} style={{ margin: 'auto', width: '20px' }} alt="route-pt" />
+                    </div>}
+
+
+                </Marker>
+
+
+            </div>
+        })
+    })
+}
+function renderRouteLayers(routes: ChannelType[], idColorMap: Record<string, string>) {
+    return routes.map((route: ChannelType) => {
+        return <Source id="routes" type="geojson" data={createLineGeoJson(route.contents)}>
+            <Layer {...createLayer(idColorMap[route.uniqueID])}></Layer>
+        </Source>
+
+    })
+}
+
+export function renderState( 
+    state: State, 
+    idColorMap: Record<string, string>,
+    routeAssets: Asset[],
+    routeAssetsSelected: Asset[],
+    setHoverRoute: (route: ChannelType) => void,
+    displayPopup: (show: boolean) => void,
+    setSelectedRoute: (route: ChannelType) => void){
+        const routes = getNestedRoutes(state)
+        return<>
+        {renderRoutes(routes, idColorMap, routeAssets, routeAssetsSelected, setHoverRoute, displayPopup, setSelectedRoute)}
+        {renderRouteLayers(routes, idColorMap)}
+        </>
+        
+    }
+
+
+export function renderCommunity(
+    community: ChannelType, 
+    idColorMap: Record<string, string>,
+    routeAssets: Asset[],
+    routeAssetsSelected: Asset[],
+    setHoverRoute: (route: ChannelType) => void,
+    displayPopup: (show: boolean) => void,
+    setSelectedRoute: (route: ChannelType) => void){
+    return <>
+    {renderRoutes(community.children, idColorMap, routeAssets, routeAssetsSelected, setHoverRoute, displayPopup, setSelectedRoute)}
+    {renderRouteLayers(community.children, idColorMap)}
+        <CommunityPopup community={community} idColorMap={idColorMap}></CommunityPopup>
+    </>
+}

@@ -3,7 +3,7 @@ import { BoxBound, padBounds } from "../../Types/Bounds.type";
 import { ChannelContent, ChannelType } from "../../Types/Channel.types";
 import { HistoryStackElement, selectedElementString } from "../../Types/History.stack.type";
 import { Overlay } from "../../Types/Overlay.type";
-import { State, getStateBounds } from "../../Types/State.type";
+import { State, getNestedRoutes, getStateBounds } from "../../Types/State.type";
 import { getType } from "../../Types/TypeChecks";
 import { VIEWMODE } from "../../Types/ViewMode.type";
 import { getBounds } from "../Map/Geometry/getBounds";
@@ -71,7 +71,7 @@ export function updateScrollBehaviour(
 export function updateState(
     element: HistoryStackElement,
     setSelectedCommunity: (comm: ChannelType) => void,
-    setSelectedRoutePoint: (point: ChannelContent) => void,
+    setSelectedRoute: (point: ChannelType) => void,
     setShowMenu: (show: boolean) => void,
     setScopedMarker: (marker: ChannelContent) => void,
     setRouteStartPoints: (points: ChannelContent[]) => void,
@@ -79,42 +79,46 @@ export function updateState(
     setOverlays: (overlays: Overlay[]) => void,
     setRoutes: (routes: ChannelType[]) => void,
     setView: (view: VIEWMODE) => void,
-
-    routes: ChannelType[]
+    routes: ChannelType[],
+    setStateRoutes:(routes:ChannelType[])=>void
 ) {
     setView(element.view)
     const typeOfTop: selectedElementString = getType(element.selectedElement)
     switch (typeOfTop) {
         case "State":
+            const state = element.selectedElement as State
             setOverlays([]);
             setSelectedCommunity(null)
             setRoutes([])
-            setSelectedRoutePoint(null)
+            setSelectedRoute(null)
             setScopedMarker(null)
             setRouteStartPoints([])
             setRoutePoints([])
             setRoutes([])
             setShowMenu(false);
+            setStateRoutes(getNestedRoutes(state))
             break;
 
         case "ChannelType":
             const channelType = (element.selectedElement) as ChannelType
-            const isCommunity = element.view === "Routes"
+            const isCommunity = element.view === "COMM"
+            
             if (isCommunity) {
                 setSelectedCommunity(channelType)
                 setRoutes(channelType.children)
                 setRouteStartPoints(channelType.children.map((child: ChannelType) => child.contents.at(0)))
-                setSelectedRoutePoint(null)
+                setSelectedRoute(null)
+                setScopedMarker(null)
                 setRoutePoints([]);
             }
             if (!isCommunity) {
                 setSelectedCommunity(null)
                 setRoutes([])
+                setScopedMarker((element.selectedElement as ChannelType).contents.at(0))
                 setRouteStartPoints([])
                 setRoutePoints(channelType.contents)
             }
             setShowMenu(false)
-            setScopedMarker(null)
             setOverlays(channelType.overlays)
             break
         case "ChannelContent":
@@ -122,7 +126,7 @@ export function updateState(
             setOverlays([]);
             setSelectedCommunity(null)
             setRoutes([])
-            setSelectedRoutePoint(null)
+            setSelectedRoute(null)
             setScopedMarker(channelContent)
             setRouteStartPoints([])
             setRoutePoints(routes.find((route: ChannelType) => route.contents.at(0).id === channelContent.id).contents)

@@ -1,13 +1,13 @@
 import { VIEWMODE } from "../../../Types/ViewMode.type"
 export function getZoomLevel(view:VIEWMODE){
     switch (view){
-        case "State":
+        case "IND":
             return 4
-        case "Community":
+        case "STATE":
             return 6
-        case "Routes":
+        case "COMM":
             return 7
-        case "Route":
+        case "ROUTE":
             return 10
     }
 }
