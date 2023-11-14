@@ -6,7 +6,6 @@ import { ChannelContent, ChannelType } from "../../Types/Channel.types";
 import { State, getNestedRoutes } from "../../Types/State.type";
 import { createLineGeoJson } from "./Geometry/lineGeoJson";
 import { createLayer } from "./Geometry/routeLayer";
-import { CommunityPopup } from "./Popups/popup.main";
 export const panTo = (coords: [number, number], zoom: number, mapRef: React.RefObject<MapRef>) => {
     if (mapRef.current) {
         mapRef.current.flyTo(
@@ -233,6 +232,6 @@ export function renderCommunity(
     return <>
     {renderRoutes(community.children, idColorMap, routeAssets, routeAssetsSelected, setHoverRoute, displayPopup, setSelectedRoute)}
     {renderRouteLayers(community.children, idColorMap)}
-        <CommunityPopup community={community} idColorMap={idColorMap}></CommunityPopup>
+        {/* <CommunityPopup community={community} idColorMap={idColorMap}></CommunityPopup> */}
     </>
 }

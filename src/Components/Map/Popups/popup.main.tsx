@@ -1,4 +1,4 @@
-import { Cancel } from "@mui/icons-material";
+import { ArrowLeft, ArrowRight, Cancel } from "@mui/icons-material";
 import { Button, Card, Stack, Typography } from "@mui/material";
 import { Popup } from "react-map-gl";
 import { ChannelContent, ChannelType } from "../../../Types/Channel.types";
@@ -66,26 +66,48 @@ export const ChannelPopup: React.FC<ChannelPopupProps> = ({ channel, fixed, isOp
     </Card>
 }
 
-export const ContentPopup: React.FC<ContentPopupProps> = ({ content, isOpen, onClose }: ContentPopupProps) => {
+export const ContentPopup: React.FC<ContentPopupProps> = ({ 
+    content, 
+    isOpen, 
+    onClose
+}: ContentPopupProps) => {
     if (!content || !isOpen) return;
+    document.documentElement.style.setProperty('--popup-background-color', "#F6F5F1");
+
     return (
-        <Popup className={"popupContent"} closeOnClick={false} anchor="top"
-            closeButton={false}
+        <Popup 
+        className={"popupContent"} 
+        closeOnClick={false}
+        anchor="top"
+        style={{padding:"10px"}}
+        closeButton={false}
 
             latitude={content.lat} longitude={content.long} offset={50} style={{ padding: 10, zIndex: 10, color: "#f6f6f2" }}>
             <Stack direction="column" flex={1} justifyContent={"flex-start"} alignItems={"flex-start"} >
 
                 <Stack direction="row" sx={{ width: "100%" }} justifyContent={"space-between"} padding={1} alignItems={"center"} alignContent={"center"}>
-                    <Typography color="white" variant="body1" sx={{ fontFamily: "Source Serif", color: "white", fontSize: "18px", width: "100%" }}>
+                    <Typography color="white" variant="body1" sx={{ fontFamily: "Source Serif", color: "#38424D", fontSize: "18px", width: "100%" }}>
                         {content.title}
                     </Typography>
-                    <Button onClick={() => { onClose(false) }}>
-                        <Cancel sx={{ color: "white" }}></Cancel>
+                    <Stack direction={"row"} sx={{width:"100%"}} justifyContent={"space-evenly"}>
+
+                    <Button onClick={() => {} }>
+                        <ArrowLeft sx={{ color: "#B39559" }}></ArrowLeft>
                     </Button>
+
+                    <Button onClick={() => {} }>
+                        <ArrowRight sx={{ color: "#B39559" }}></ArrowRight>
+                    </Button>
+                    <Button onClick={() => { onClose(false) }}>
+                        <Cancel sx={{ color: "#B39559" }}></Cancel>
+                    </Button>
+
+                    </Stack>
+                  
                 </Stack>
 
-                {content.mediafile && <img style={{ height: '100px', width: '100%' }} src={content.mediafile.url}></img>}
-                <Typography color="white" variant="subtitle2" sx={{ fontFamily: 'Lato', fontSize: "16px", color: 'white', marginTop: 1 }}>
+                {content.mediafile && <img style={{ height: '100px' }} src={content.mediafile.url}></img>}
+                <Typography color="white" variant="subtitle2" sx={{ fontFamily: 'Lato', fontSize: "16px", color: '#38424D', marginTop: 1 }}>
                     {content.description}
                 </Typography>
             </Stack>
