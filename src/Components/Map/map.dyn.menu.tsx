@@ -1,5 +1,5 @@
 import { Button, Card, Stack, Typography } from "@mui/material";
-import { ChannelType } from "../../Types/Channel.types";
+import { ChannelContent, ChannelType } from "../../Types/Channel.types";
 import { HistoryStack, HistoryStackElement, append } from "../../Types/History.stack.type";
 import { State } from "../../Types/State.type";
 interface DynMenuProps {
@@ -8,10 +8,11 @@ interface DynMenuProps {
     states: State[],
     idColorMap: Record<string, string>,
     setHistory: React.Dispatch<React.SetStateAction<HistoryStack>>
-    setSelectedRoute:  React.Dispatch<React.SetStateAction<ChannelType>>
+    setSelectedRoute:  React.Dispatch<React.SetStateAction<ChannelType>>,
+    setScopedMarker: React.Dispatch<React.SetStateAction<ChannelContent>>
 }
 
-export const DynMenu = ({ history, topOfStack, states, idColorMap, setHistory, setSelectedRoute }: DynMenuProps) => {
+export const DynMenu = ({ history, topOfStack, states, idColorMap, setHistory, setSelectedRoute, setScopedMarker }: DynMenuProps) => {
 
     const renderMenuContent = (history: HistoryStack, topOfStack: HistoryStackElement, states: State[], isWhite: boolean) => {
         if (topOfStack.view === 'IND') {
@@ -99,7 +100,20 @@ export const DynMenu = ({ history, topOfStack, states, idColorMap, setHistory, s
                 <Typography variant="body1" sx={{ fontFamily: "Source Serif", color: "#38424D", fontSize: "18px", width: "100%" }}>
                     {`Explore ${route.name}`}
                 </Typography>
-                {route.contents.map(routePoint => <Typography sx={{ color:'#38424D',fontFamily: "Source Serif" }} >{routePoint.title}</Typography>)}
+                <Typography  variant="subtitle2" sx={{ fontFamily: 'Lato', fontSize: "16px", color: '#38424D', marginTop: 1, width:"100%" }}>
+                {route.description}
+            </Typography>
+                <Typography  variant="subtitle2" sx={{ fontFamily: 'Lato', fontSize: "16px", color: '#38424D', marginTop: 1, width:"100%" }}>
+                    Route Points
+                </Typography>
+                {route.contents.map(routePoint => <Button
+                    sx={{justifyContent:"left", textTransform:"none"}}
+                    onClick={() => {
+                       setScopedMarker(routePoint)
+                    }}
+                >
+                    <Typography sx={{ color: '#38424D', fontFamily: "Lato" }} >{routePoint.title}</Typography>
+                </Button>)}
             </Stack>
         }
 

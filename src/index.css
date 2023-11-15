@@ -11,6 +11,7 @@ body {
 
 :root {
   --popup-background-color: #fff; /* Default color */
+  --popup-border-radius:10px;
 }
 
 @font-face {
@@ -29,6 +30,7 @@ body {
  .mapboxgl-popup-content{
   background-color: var(--popup-background-color);
   width: 405px;
+  border-radius:var(--popup-border-radius);
  }
  .mapboxgl-popup-anchor-top .mapboxgl-popup-tip{
   border-bottom-color:  var(--popup-background-color); 

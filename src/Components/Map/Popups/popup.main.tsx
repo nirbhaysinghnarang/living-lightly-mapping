@@ -1,9 +1,9 @@
-import { ArrowLeft, ArrowRight, Cancel } from "@mui/icons-material";
-import { Button, Card, Stack, Typography } from "@mui/material";
+import { Cancel } from "@mui/icons-material";
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import { Button, Card, IconButton, Stack, Typography } from "@mui/material";
 import { Popup } from "react-map-gl";
 import { ChannelContent, ChannelType } from "../../../Types/Channel.types";
-
-
 interface ChannelPopupProps {
     channel: ChannelType,
     fixed: boolean,
@@ -17,7 +17,9 @@ interface ContentPopupProps {
     content: ChannelContent,
     isOpen: boolean,
     color: string,
-    onClose: (b: boolean) => void
+    onClose: (b: boolean) => void,
+    onNextArrowClick: ()=>void,
+    onPrevArrowClick: ()=> void,
 }
 
 interface CommunityPopupProps {
@@ -69,7 +71,9 @@ export const ChannelPopup: React.FC<ChannelPopupProps> = ({ channel, fixed, isOp
 export const ContentPopup: React.FC<ContentPopupProps> = ({ 
     content, 
     isOpen, 
-    onClose
+    onClose,
+    onNextArrowClick,
+    onPrevArrowClick
 }: ContentPopupProps) => {
     if (!content || !isOpen) return;
     document.documentElement.style.setProperty('--popup-background-color', "#F6F5F1");
@@ -89,18 +93,18 @@ export const ContentPopup: React.FC<ContentPopupProps> = ({
                     <Typography color="white" variant="body1" sx={{ fontFamily: "Source Serif", color: "#38424D", fontSize: "18px", width: "100%" }}>
                         {content.title}
                     </Typography>
-                    <Stack direction={"row"} sx={{width:"100%"}} justifyContent={"space-evenly"}>
+                    <Stack direction={"row"} sx={{width:"100%"}} justifyContent={"space-around"}>
 
-                    <Button onClick={() => {} }>
-                        <ArrowLeft sx={{ color: "#B39559" }}></ArrowLeft>
-                    </Button>
+                    <IconButton onClick={() => onPrevArrowClick() }>
+                        <KeyboardArrowLeftIcon sx={{ color: "#B39559" }}></KeyboardArrowLeftIcon>
+                    </IconButton>
 
-                    <Button onClick={() => {} }>
-                        <ArrowRight sx={{ color: "#B39559" }}></ArrowRight>
-                    </Button>
-                    <Button onClick={() => { onClose(false) }}>
+                    <IconButton onClick={() => onNextArrowClick() }>
+                        <KeyboardArrowRightIcon sx={{ color: "#B39559" }}></KeyboardArrowRightIcon>
+                    </IconButton>
+                    <IconButton onClick={() => { onClose(false) }}>
                         <Cancel sx={{ color: "#B39559" }}></Cancel>
-                    </Button>
+                    </IconButton>
 
                     </Stack>
                   

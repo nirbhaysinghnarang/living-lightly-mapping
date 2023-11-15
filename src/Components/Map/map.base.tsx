@@ -20,7 +20,6 @@ import { createLineGeoJson } from "./Geometry/lineGeoJson.ts";
 import { createLayer } from "./Geometry/routeLayer.ts";
 import { ChannelPopup, ContentPopup } from "./Popups/popup.main.tsx";
 import { MapBreadCrumbs } from "./map.breadcrumbs.tsx";
-import { Cycle } from "./map.cycle.tsx";
 import { DynMenu } from "./map.dyn.menu.tsx";
 import { InsetMap } from "./map.inset.tsx";
 import { MenuOptions } from './map.options.menu.tsx';
@@ -258,10 +257,11 @@ export const BaseMap: React.FC<MapProps> = ({
 
                 }}
             >
-                {states && idColorMap && <Box sx={{ position: 'absolute', top: "50px", left: "80px", zIndex: 10 }}>
+                {states && idColorMap && scopedMarker && <Box sx={{ position: 'absolute', top: "50px", left: "80px", zIndex: 10 }}>
                     <div>
                         <DynMenu
                             setSelectedRoute={setSelectedRoute}
+                            setScopedMarker={setScopedMarker}
                             setHistory={setHistoryStack} idColorMap={idColorMap} history={historyStack} topOfStack={peek(historyStack)} states={states} />
                     </div>
                 </Box>}
@@ -293,12 +293,7 @@ export const BaseMap: React.FC<MapProps> = ({
 
 
                 {view === "ROUTE" && (selectedRoute) && <div id="route-points">
-                    {<ChannelPopup
-                        isFromHover={false}
-                        color={idColorMap[selectedRoute.uniqueID]}
-                        fixed={true} isOpen={isChannelPopupOpen}
-                        handleClose={setIsChannelPopupOpen}
-                        channel={selectedRoute}></ChannelPopup>}
+                 
 
                     <Source id="routes" type="geojson" data={createLineGeoJson(selectedRoute.contents)}>
                         {<Layer {...createLayer(idColorMap[routePoints[0].id])}></Layer>}
@@ -311,17 +306,15 @@ export const BaseMap: React.FC<MapProps> = ({
                         idColorMap[selectedRoute.contents[0].id],
                         setIsContentPopupOpen
                     )}
-                    <Cycle
-                        arrowPrevImage={ARROW_PREV}
-                        arrowNextImage={ARROW_NEXT}
-                        onNextArrowClick={() => {
-                            setScopedMarker(cycle(scopedMarker, routePoints, "UP"))
-                        }}
-                        onPrevArrowClick={() => {
-                            setScopedMarker(cycle(scopedMarker, routePoints, "DOWN"))
-                        }}
-                    />
-                    {scopedMarker && <ContentPopup isOpen={isContentPopupOpen} onClose={setIsContentPopupOpen} content={scopedMarker} ></ContentPopup>}
+                   
+                    {scopedMarker && <ContentPopup 
+                    onNextArrowClick={() => {
+                        setScopedMarker(cycle(scopedMarker, routePoints, "UP"))
+                    }}
+                    onPrevArrowClick={() => {
+                        setScopedMarker(cycle(scopedMarker, routePoints, "DOWN"))
+                    }}
+                    isOpen={isContentPopupOpen} onClose={setIsContentPopupOpen} content={scopedMarker} ></ContentPopup>}
                 </div>}
 
 

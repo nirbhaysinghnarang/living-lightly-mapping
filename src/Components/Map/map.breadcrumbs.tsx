@@ -17,7 +17,7 @@ export const MapBreadCrumbs:React.FC<MapBreadCrumbsProps> = ({history}:MapBreadC
     }
 
 
-    return <Breadcrumbs sx={{padding:'10px', background:"#f6f6f2", zIndex:99}} separator={<NavigateNext fontSize="small" />}>
+    return <Breadcrumbs sx={{padding:'10px', opacity:0.9, background:"#f6f6f2", zIndex:99}} separator={<NavigateNext fontSize="small" />}>
         {history.map((elem,index)=>{
             return <Typography sx={{fontFamily:"Source Serif", color:"black", fontStyle:"italic"}}>{getDisplayNameFromElement(elem, index)}</Typography>
         })}
