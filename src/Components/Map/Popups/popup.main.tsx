@@ -18,8 +18,8 @@ interface ContentPopupProps {
     isOpen: boolean,
     color: string,
     onClose: (b: boolean) => void,
-    onNextArrowClick: ()=>void,
-    onPrevArrowClick: ()=> void,
+    onNextArrowClick: () => void,
+    onPrevArrowClick: () => void,
 }
 
 interface CommunityPopupProps {
@@ -68,9 +68,9 @@ export const ChannelPopup: React.FC<ChannelPopupProps> = ({ channel, fixed, isOp
     </Card>
 }
 
-export const ContentPopup: React.FC<ContentPopupProps> = ({ 
-    content, 
-    isOpen, 
+export const ContentPopup: React.FC<ContentPopupProps> = ({
+    content,
+    isOpen,
     onClose,
     onNextArrowClick,
     onPrevArrowClick
@@ -79,54 +79,58 @@ export const ContentPopup: React.FC<ContentPopupProps> = ({
     document.documentElement.style.setProperty('--popup-background-color', "#F6F5F1");
 
     return (
-        <Popup 
-        className={"popupContent"} 
-        closeOnClick={false}
-        anchor="top"
-        style={{padding:"10px"}}
-        closeButton={false}
+        <Popup
+            className={"popupContent"}
+            closeOnClick={false}
+            anchor="top"
+            closeButton={false}
 
-            latitude={content.lat} longitude={content.long} offset={50} style={{ padding: 10, zIndex: 10, color: "#f6f6f2" }}>
-            <Stack direction="column" flex={1} justifyContent={"flex-start"} alignItems={"flex-start"} >
+            latitude={content.lat} longitude={content.long} offset={50} style={{ padding: 20, zIndex: 10, color: "#f6f6f2" }}>
+            <Stack direction="column" flex={1} justifyContent={"flex-end"} alignItems={"flex-end"} >
 
-                <Stack direction="row" sx={{ width: "100%" }} justifyContent={"space-between"} padding={1} alignItems={"center"} alignContent={"center"}>
-                    <Typography color="white" variant="body1" sx={{ fontFamily: "Source Serif", color: "#38424D", fontSize: "18px", width: "100%" }}>
+                <Stack direction={"column"} sx={{ width: "100%" }} alignItems={"flex-start"}>
+                    <Stack direction={"row"} alignContent={"center"} justifyContent={"space-between"} width={"100%"}>
+                    <Typography color="white" variant="body1" sx={{ fontFamily: "Georgia", color: "#38424D", fontSize: "18px", width: "100%", fontWeight: 'bold' }}>
                         {content.title}
                     </Typography>
-                    <Stack direction={"row"} sx={{width:"100%"}} justifyContent={"space-around"}>
+                        <Stack direction={"row"} alignContent={"center"}>
+                            <IconButton onClick={() => onPrevArrowClick()}>
+                                <KeyboardArrowLeftIcon sx={{ color: "#B39559" }}></KeyboardArrowLeftIcon>
+                            </IconButton>
+                            <IconButton onClick={() => onNextArrowClick()}>
+                                <KeyboardArrowRightIcon sx={{ color: "#B39559" }}></KeyboardArrowRightIcon>
+                            </IconButton>
+                            <IconButton onClick={() => { onClose(false) }}>
+                                <Cancel sx={{ color: "#B39559" }}></Cancel>
+                            </IconButton>
 
-                    <IconButton onClick={() => onPrevArrowClick() }>
-                        <KeyboardArrowLeftIcon sx={{ color: "#B39559" }}></KeyboardArrowLeftIcon>
-                    </IconButton>
-
-                    <IconButton onClick={() => onNextArrowClick() }>
-                        <KeyboardArrowRightIcon sx={{ color: "#B39559" }}></KeyboardArrowRightIcon>
-                    </IconButton>
-                    <IconButton onClick={() => { onClose(false) }}>
-                        <Cancel sx={{ color: "#B39559" }}></Cancel>
-                    </IconButton>
-
+                        </Stack>
                     </Stack>
-                  
+                   
+                    {content.tags.length > 0 && content.tags.map(tag => <Typography variant="body1" fontStyle={"italic"}
+                        sx={{ fontFamily: "Source Serif", color: "#38424D", }}
+                    >{tag.tag}</Typography>)}
+
+                    {content.mediafile && <img style={{ height: '100px' }} src={content.mediafile.url}></img>}
+                    <Typography color="white" variant="subtitle2" sx={{ fontFamily: 'Lato', fontSize: "16px", color: '#38424D', marginTop: 1 }}>
+                        {content.description}
+                    </Typography>
                 </Stack>
 
-                {content.mediafile && <img style={{ height: '100px' }} src={content.mediafile.url}></img>}
-                <Typography color="white" variant="subtitle2" sx={{ fontFamily: 'Lato', fontSize: "16px", color: '#38424D', marginTop: 1 }}>
-                    {content.description}
-                </Typography>
+
             </Stack>
         </Popup>);
 }
 
 export const CommunityPopup: React.FC<CommunityPopupProps> = ({ community, idColorMap }: CommunityPopupProps) => {
-   return <Card style={{ position: "absolute", top: 300, left: "80px", maxWidth: 300, opacity: 1, padding: "10px", backgroundColor: idColorMap[community.uniqueID] }}>
+    return <Card style={{ position: "absolute", top: 300, left: "80px", maxWidth: 300, opacity: 1, padding: "10px", backgroundColor: idColorMap[community.uniqueID] }}>
         <Stack direction="column" flex={1} justifyContent={"flex-start"} alignItems={"flex-start"}>
 
             <Stack direction={"row"} sx={{ width: "100%" }} justifyContent={"space-between"} alignContent={"center"} alignItems={"center"}>
                 <Typography color="white" variant="body1" sx={{ fontFamily: "Source Serif", color: "white", fontSize: "18px", }}>
                     {community.name}
                 </Typography>
-                
+
             </Stack>
             {community.picture && <img style={{ height: '100px', width: '100%' }} src={community.picture.url}></img>}
             <Typography color="white" variant="subtitle2" sx={{ fontFamily: 'Lato', fontSize: "16px", color: 'white', marginTop: 1 }}>

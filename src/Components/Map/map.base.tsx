@@ -257,7 +257,7 @@ export const BaseMap: React.FC<MapProps> = ({
 
                 }}
             >
-                {states && idColorMap && scopedMarker && <Box sx={{ position: 'absolute', top: "50px", left: "80px", zIndex: 10 }}>
+                {states && idColorMap && <Box sx={{ position: 'absolute', top: "50px", left: "80px", zIndex: 10 }}>
                     <div>
                         <DynMenu
                             setSelectedRoute={setSelectedRoute}

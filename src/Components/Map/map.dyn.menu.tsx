@@ -14,6 +14,7 @@ interface DynMenuProps {
 
 export const DynMenu = ({ history, topOfStack, states, idColorMap, setHistory, setSelectedRoute, setScopedMarker }: DynMenuProps) => {
 
+
     const renderMenuContent = (history: HistoryStack, topOfStack: HistoryStackElement, states: State[], isWhite: boolean) => {
         if (topOfStack.view === 'IND') {
             return <Stack direction="column" spacing={1}>
@@ -72,7 +73,7 @@ export const DynMenu = ({ history, topOfStack, states, idColorMap, setHistory, s
                 <Typography variant="body1" sx={{ fontFamily: "Source Serif", color: idColorMap[community.uniqueID], fontSize: "18px", width: "100%" }}>
                     {`${community.name}`}
                 </Typography>
-                {community.picture && <img style={{ height: '100px', width: '100%' }} src={community.picture.url}></img>}
+                {community.picture && <img style={{ height: '200px' }} src={community.picture.url}></img>}
                 <Typography  variant="subtitle2" sx={{ fontFamily: 'Lato', fontSize: "16px", color: '#38424D', marginTop: 1, width:"100%" }}>
                 {community.description}
             </Typography>

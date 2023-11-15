@@ -1,6 +1,5 @@
 import { Nullable } from 'tsdef';
 import { Overlay } from './Overlay.type';
-import { BoxBound, MapBounds, get2DBounds } from './Bounds.type';
 /**
  * This file contains types to fit in with the existing MVC typing system and exports them globally.
  */
@@ -46,12 +45,15 @@ export type ChannelType = {
  * This is the base level content for each channel. 
  * There is no nested data here
  */
+
+export type Tag = {id:number, tag:string}
 export type ChannelContent = {
     parent: ChannelType,
     description: Nullable<string>,
     id: number,
     lat: number,
     long: number,
+    tags:Tag[],
     title: Nullable<String>,
     mediafile: Nullable<MediaFile>
 }
@@ -60,6 +62,8 @@ type MediaFile = {
     caption: Nullable<String>,
     url: string,
 }
+
+
 
 type Tileset = {
     id: number,

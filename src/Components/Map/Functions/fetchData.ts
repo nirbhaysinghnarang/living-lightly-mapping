@@ -1,6 +1,6 @@
 import { AxiosResponse } from "axios";
-import { getSubChannel, getChannel, getContentForChannel } from "../../../Client/mvc.client";
-import { ChannelType, ChannelContent} from "../../../Types/Channel.types";
+import { getChannel, getContentForChannel } from "../../../Client/mvc.client";
+import { ChannelType } from "../../../Types/Channel.types";
 import { Overlay, isValidOverlay } from "../../../Types/Overlay.type";
 
 

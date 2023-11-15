@@ -29,8 +29,9 @@ body {
  
  .mapboxgl-popup-content{
   background-color: var(--popup-background-color);
-  width: 405px;
   border-radius:var(--popup-border-radius);
+  width: 400px;
+  height: 445px;
  }
  .mapboxgl-popup-anchor-top .mapboxgl-popup-tip{
   border-bottom-color:  var(--popup-background-color); 
