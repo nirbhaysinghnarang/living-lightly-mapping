@@ -8,6 +8,6 @@ export function getZoomLevel(view:VIEWMODE){
         case "COMM":
             return 7
         case "ROUTE":
-            return 10
+            return 12
     }
 }

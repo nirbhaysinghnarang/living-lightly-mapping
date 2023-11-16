@@ -77,3 +77,7 @@ export const CONSTANT_ASSETS: Asset[] = [
 
 
 
+
+
+export const routeAssets = [CONSTANT_ASSETS.find(elem => elem.id === "ROUTE_1"), CONSTANT_ASSETS.find(elem => elem.id === "ROUTE_2")]
+export const routeAssetSelected = [CONSTANT_ASSETS.find(elem => elem.id === "ROUTE_1_SEL"), CONSTANT_ASSETS.find(elem => elem.id === "ROUTE_2_SEL")]

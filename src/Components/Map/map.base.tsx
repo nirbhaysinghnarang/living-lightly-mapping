@@ -3,29 +3,29 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import React, { useEffect, useRef, useState } from 'react';
 import { Layer, Map, Marker, Source } from 'react-map-gl';
 import { COLORS } from "../../Constants/Colors/color.mapping.js";
-import { BASE_MAP_BOUNDS } from "../../Constants/map.ts";
+import { BASE_MAP_BOUNDS } from '../../Constants/map.ts';
 import { BoxBound } from '../../Types/Bounds.type.ts';
 import { ChannelContent, ChannelType } from "../../Types/Channel.types.ts";
 import { HistoryStack, HistoryStackElement, append, initialStackElement, peek, pop } from "../../Types/History.stack.type.ts";
 import { MapProps } from "../../Types/MapProps";
 import { Overlay } from "../../Types/Overlay.type.ts";
-import { State, constructStates } from "../../Types/State.type.ts";
+import { State, constructStates, getNestedRoutes } from "../../Types/State.type.ts";
 import { VIEWMODE } from "../../Types/ViewMode.type.ts";
-import { setBounds, updateScrollBehaviour, updateState } from "../State/map.state.handler.ts";
+import { setBounds, updateScrollBehaviour } from "../State/map.state.handler.ts";
 import { handleClickStateLevel } from "./Events/handleClick.ts";
 import { cycle } from "./Functions/cycle.ts";
 import { fetchData } from "./Functions/fetchData.ts";
 import { createPolygonLayer } from "./Geometry/drawStates.ts";
 import { getBounds } from './Geometry/getBounds.ts';
 import { getZoomLevel } from "./Geometry/getZoomLevel.ts";
-import { createLineGeoJson } from "./Geometry/lineGeoJson.ts";
-import { createLayer } from "./Geometry/routeLayer.ts";
 import { ChannelPopup, ContentPopup } from "./Popups/popup.main.tsx";
 import { MapBreadCrumbs } from "./map.breadcrumbs.tsx";
 import { DynMenu } from "./map.dyn.menu.tsx";
-import { InsetMap } from "./map.inset.tsx";
 import { MenuOptions } from './map.options.menu.tsx';
-import { panTo, renderCommunity, renderRoutePoints, renderState } from "./map.utils.tsx";
+import { panTo } from "./map.utils.tsx";
+import { renderCommunityView, renderRouteView, renderStateView } from './map.views.tsx';
+
+
 
 export const BaseMap: React.FC<MapProps> = ({
     assetList,
@@ -38,85 +38,112 @@ export const BaseMap: React.FC<MapProps> = ({
 }: MapProps) => {
 
     const MAP_OVERLAY_ASSET = assetList.find(elem => elem.id == "MAP_OVERLAY_ASSET")
-    const ARROW_PREV = assetList.find(elem => elem.id === "ARROW_PREV_IMG")
-    const ARROW_NEXT = assetList.find(elem => elem.id === "ARROW_NEXT_IMG")
     const mapRef = useRef(null);
-
-
-    const routeAssets = [assetList.find(elem => elem.id === "ROUTE_1"), assetList.find(elem => elem.id === "ROUTE_2")]
-    const routeAssetSelected = [assetList.find(elem => elem.id === "ROUTE_1_SEL"), assetList.find(elem => elem.id === "ROUTE_2_SEL")]
-
-
     /**
      * useState hooks for data management
      */
 
-
-
-
-    const [communities, setCommunities] = useState<ChannelType[]>(null);
-    const [selectedCommunity, setSelectedCommunity] = useState<ChannelType>(null);
-    const [routes, setRoutes] = useState<ChannelType[]>(null);
-    const [routeStartPoints, setRouteStartPoints] = useState<ChannelContent[]>();
-    const [routePoints, setRoutePoints] = useState<ChannelContent[]>(null);
-    const [scopedMarker, setScopedMarker] = useState<ChannelContent>(null);
-    const [selectedRoute, setSelectedRoute] = useState<ChannelType>(null)
-    const [states, setStates] = useState<State[]>([]);
-    const [view, setView] = useState<VIEWMODE>("IND");
-    const [hoverCommunity, setHoverCommunity] = useState<ChannelType>(null);
+    // UI State
     const [hoverRoute, setHoverRoute] = useState<ChannelType>(null);
-    const [hoverRoutePoints, setHoverRoutePoints] = useState<ChannelContent[]>(null);
-    const [overlays, setOverlays] = useState<Overlay[]>([]);
-    const [idColorMap, setIdColorMap] = useState<any>();
-    const [stateRoutes, setStateRoutes] = useState<ChannelType[]>([]);
+    const [selectedRoute, setSelectedRoute] = useState<ChannelType>(null)
+    const [scopedMarker, setScopedMarker] = useState<ChannelContent>(null);
+
+
+    //Popup State
     const [isContentPopupOpen, setIsContentPopupOpen] = useState<boolean>(false);
     const [isChannelPopupOpen, setIsChannelPopupOpen] = useState<boolean>(false);
-    const [selState, setSelState] = useState<State | null>(null)
 
-    const [scopedCommunity, setScopedCommunity] = useState<null | ChannelType>(null);
-    const [historyStack, setHistoryStack] = useState<HistoryStack>([
-        initialStackElement
-    ]);
+    //Data State
+    const [states, setStates] = useState<State[]>([]);
+    const [communities, setCommunities] = useState<ChannelType[]>(null);
+    const [routes, setRoutes] = useState<ChannelType[]>(null);
 
+
+
+    const [selectedCommunity, setSelectedCommunity] = useState<ChannelType>(null);
+    const [view, setView] = useState<VIEWMODE>("IND");
+    const [hoverCommunity, setHoverCommunity] = useState<ChannelType>(null);
+    const [overlays, setOverlays] = useState<Overlay[]>([]);
+    const [historyStack, setHistoryStack] = useState<HistoryStack>([]);
+    /**
+     * Cached data stores
+     */
+    const [stateRouteMap, setStateRouteMap] = useState<Record<string, ChannelType[]>>()
+    const [idColorMap, setIdColorMap] = useState<Record<string, string>>()
     const [idBoundsMap, setIdBoundsMap] = useState<Record<string, BoxBound>>()
+    const [loaded, setLoaded] = useState(false)
     const recursivelyPopulateColorMap = (communities: ChannelType[]) => {
         const map: Record<string, string> = {};
         const helper = (community: ChannelType, map: Record<string, string>, index: number) => {
             map[community.uniqueID] = COLORS[index % (COLORS.length)]
             if (!community.children) return
-            if (community.contents) for (const content of community.contents) map[content.id] = COLORS[index % (COLORS.length )]
+            if (community.contents) for (const content of community.contents) map[content.id] = COLORS[index % (COLORS.length)]
             for (const child of community.children) helper(child, map, index)
         }
 
         for (let i = 0; i < communities.length; i++) helper(communities[i], map, i);
-        return map;
+        setIdColorMap(map);
     }
-
-
-    const populateBoundsMap = (communities:ChannelType[]) =>{
+    const recursivelyPopulateBoundsMap = (communities: ChannelType[]) => {
         const map: Record<string, BoxBound> = {};
-        const helper = (community:ChannelType, map:Record<string, BoxBound>) => {
+        const helper = (community: ChannelType, map: Record<string, BoxBound>) => {
             map[community.uniqueID] = getBounds(community)
-            if(community.children) community.children.forEach(child=> helper(child, map))
+            if (community.children) community.children.forEach(child => helper(child, map))
         }
-        communities.forEach((community:ChannelType) => helper(community, map))
+        communities.forEach((community: ChannelType) => helper(community, map))
         setIdBoundsMap(map)
     }
+    const populateStateRouteMap = (states: State[]) => {
+        let map: Record<string, ChannelType[]> = {}
+        states.forEach(state => {
+            map[state.name] = getNestedRoutes(state)
+        })
+        setStateRouteMap(map);
 
+    }
+    /**
+     * 
+     * UI/State Management Maxim
+     * 1. The stack acts as the intermediary between UI elements and the state
+     * 2. UI Interaction will only update the stack
+     * 3. As soon as an item is pushed onto the stack, the state will be updated
+     * 4. The UI updates in sync with the state
+     */
+    /**
+     * Data Fetching
+     */
+    useEffect(() => {
+        fetchData(channelId).then((data) => {
+            setCommunities(data.children);
+            setZoom(getZoomLevel(view));
+        })
+    }, [])
+    /**
+     * Computing data
+     */
+    useEffect(() => {
+        if (communities) setStates(constructStates(communities))
+        if (communities) recursivelyPopulateColorMap(communities)
+        if (communities) recursivelyPopulateBoundsMap(communities)
+    }, [communities])
 
-    
+    useEffect(() => {
+        if (states) populateStateRouteMap(states)
+    }, [states])
 
+    //Once these are computed, we initialize the stack and display the map.
+    useEffect(() => {
+        if (stateRouteMap && idBoundsMap && idBoundsMap) setLoaded(true)
+    }, [stateRouteMap, idBoundsMap, idColorMap])
 
+    useEffect(() => { if (loaded) setHistoryStack([initialStackElement]) }, [loaded])
     /**
      * useState hooks for UI management
      */
-    const [showMenu, setShowMenu] = useState(false);
     const [zoom, setZoom] = useState(getZoomLevel(view))
-    useEffect(() => { if (hoverCommunity && typeof (hoverRoute) !== "undefined") { setHoverRoutePoints(hoverRoute.contents); setIsChannelPopupOpen(true) } }, [hoverRoute])
     /**
      * useEffect Hooks
      */
-
     //This useEffect hook will automagically set zoom level, proper coordinates, and overlays based on the last element on the stack.
     useEffect(() => {
         if (historyStack && historyStack.length > 1) {
@@ -124,34 +151,7 @@ export const BaseMap: React.FC<MapProps> = ({
             setView(stackTop.view)
             updateScrollBehaviour(stackTop, mapRef)
             setBounds(stackTop, mapRef, setOverlays, idBoundsMap)
-            updateState(
-                stackTop,
-                setSelectedCommunity,
-                setSelectedRoute,
-                setShowMenu,
-                setScopedMarker,
-                setRouteStartPoints,
-                setRoutePoints,
-                setOverlays,
-                setRoutes,
-                setView,
-                routes,
-                setStateRoutes
-            )
-
-            if (stackTop.view === 'STATE') {
-                setSelState(stackTop.selectedElement as State)
-            }
-            if (stackTop.view === 'ROUTE') {
-                const route = stackTop.selectedElement as ChannelType
-                setSelectedRoute(route)
-                setScopedCommunity(route)
-                setIsChannelPopupOpen(true)
-            }
-            if (stackTop.view === 'COMM') {
-                setSelectedCommunity(stackTop.selectedElement as ChannelType)
-                setIsChannelPopupOpen(true)
-            }
+            if (stackTop.view === 'ROUTE') setScopedMarker(((stackTop.selectedElement) as ChannelType).contents.at(0))
         } else {
             panTo([mapCenter.lng, mapCenter.lat], getZoomLevel("IND"), mapRef)
             setView("IND")
@@ -161,65 +161,8 @@ export const BaseMap: React.FC<MapProps> = ({
         }
 
     }, [historyStack])
-    useEffect(() => {
-        fetchData(channelId).then((data) => {
-            console.log(data.children)
-            setCommunities(data.children);
-            setZoom(getZoomLevel(view));
-        })
-    }, [])
-    useEffect(() => {
-        if (communities) setStates(constructStates(communities))
-        if (communities) setIdColorMap(recursivelyPopulateColorMap(communities))
-        if(communities) populateBoundsMap(communities)
-    }, [communities])
-    useEffect(() => {
-        if (selectedCommunity && peek(historyStack).selectedElement !== selectedCommunity) {
-            setIsChannelPopupOpen(true)
-            setHistoryStack((prevStack: HistoryStack) => {
-                return append([...prevStack],
-                    {
-                        view: "COMM",
-                        selectedElement: selectedCommunity
-                    }
-                )
-            })
-        }
-    }, [selectedCommunity])
-    useEffect(() => {
-        if (selectedRoute) {
-            const selectedCommunity = communities.find(community => {
-                return community.children.map(route => route.uniqueID).includes(selectedRoute.uniqueID)
-            })
-            setScopedCommunity(selectedCommunity)
-            setScopedMarker(selectedRoute.contents.at(0))
-            let stack = [...historyStack]
-            const prevTop = peek(stack)
-            //There are some cases to consider here.
-            //1. Previous top of the stack was a state
-            //2. Previous top of the stack was a community
-            //In case 1, we want to add the correct community and this to the top of the stack
-            //In case 2, we only add this to the top of the stack
-            if (prevTop.view === "STATE") {
-                stack = append([...stack], {
-                    view: "COMM",
-                    selectedElement: selectedCommunity
-                })
-            }
 
-            stack = append([...stack], {
-                view: "ROUTE",
-                selectedElement: selectedRoute
-            })
-            setHistoryStack([...stack])
-        }
-    }, [selectedRoute])
-    useEffect(() => {
-        if (hoverCommunity) {
-            setIsChannelPopupOpen(true)
-        }
 
-    }, [hoverCommunity])
     useEffect(() => {
         if (scopedMarker) {
             setIsContentPopupOpen(true)
@@ -233,7 +176,7 @@ export const BaseMap: React.FC<MapProps> = ({
 
 
 
-
+    if (historyStack.length === 0) return <></>
     return (<>
         <Box sx={{ backgroundImage: `url('${MAP_OVERLAY_ASSET?.url}')`, width: '100vw', height: '100vh', backgroundSize: "100vw 100vh", zIndex: 1 }}>
             <Map
@@ -249,11 +192,10 @@ export const BaseMap: React.FC<MapProps> = ({
                 scrollZoom={false}
                 mapboxAccessToken={accessToken}
                 onClick={(e) => {
-                    if (states && view === "IND") {
+                    if (view === "IND") {
                         const resultOfClick: State | null = handleClickStateLevel(e.lngLat, mapRef, (states))
                         if (resultOfClick) {
                             setView("STATE")
-                            setCommunities(resultOfClick.communities)
                             const stackTop: HistoryStackElement = {
                                 view: "STATE",
                                 selectedElement: resultOfClick
@@ -266,69 +208,78 @@ export const BaseMap: React.FC<MapProps> = ({
 
                 }}
             >
-                {states && idColorMap && <Box sx={{ position: 'absolute', top: "50px", left: "80px", zIndex: 10 }}>
+                <Box sx={{ position: 'absolute', top: "50px", left: "80px", zIndex: 10 }}>
                     <div>
                         <DynMenu
-                            setSelectedRoute={setSelectedRoute}
+                            setHistory={setHistoryStack}
                             setScopedMarker={setScopedMarker}
-                            setHistory={setHistoryStack} idColorMap={idColorMap} history={historyStack} topOfStack={peek(historyStack)} states={states} />
+                            idColorMap={idColorMap}
+                            history={historyStack}
+                            topOfStack={peek(historyStack)}
+                            states={states} />
                     </div>
-                </Box>}
-                {hasInset && <InsetMap
-                    channelId={insetMapProps!.channelId}
-                    hasInset={false}
-                    accessToken={insetMapProps!.accessToken}
-                    assetList={insetMapProps!.assetList}
-                    mapZoom={insetMapProps!.mapZoom}
-                    mapBounds={insetMapProps!.mapBounds}
-                    mapCenter={insetMapProps!.mapCenter}
-                    mapStyle={insetMapProps!.mapStyle}
-                    insetMapProps={null}
-                ></InsetMap>}
+                </Box>
                 {view === "IND" && states && states.map((state: State) => {
-                    return <Source id={"state"} type="geojson" data={state.features} >
-                        <Layer id={state.name} {...createPolygonLayer()} />
+                    return <Source id={state.name} type="geojson" data={state.features} >
+                        <Layer id={state.name} {...createPolygonLayer(state.name)} />
                     </Source>
                 })}
                 {view === "STATE" && <div id="community">
-                    {renderState(selState, idColorMap, routeAssets, routeAssetSelected, setHoverRoute, setIsChannelPopupOpen, setSelectedRoute)}
+                    {renderStateView(
+                        historyStack,
+                        setHistoryStack,
+                        idColorMap,
+                        setHoverRoute,
+                        setIsChannelPopupOpen,
+                        stateRouteMap,
+                        communities,
+                    )
+                    }
                     {hoverRoute && <ChannelPopup isFromHover={true} color={idColorMap[hoverRoute.uniqueID]} isOpen={isChannelPopupOpen} handleClose={setIsChannelPopupOpen} channel={hoverRoute} fixed={false}></ChannelPopup>}
                 </div>
                 }
                 {view === "COMM" && <div id="route-start-points">
-                    {renderCommunity(selectedCommunity, idColorMap, routeAssets, routeAssetSelected, setHoverRoute, setIsChannelPopupOpen, setSelectedRoute)}
-                    {hoverRoute && <ChannelPopup isFromHover={true} color={idColorMap[hoverRoute.uniqueID]} isOpen={isChannelPopupOpen} handleClose={setIsChannelPopupOpen} channel={hoverRoute} fixed={false}></ChannelPopup>}
+
+                    {renderCommunityView(
+                        historyStack,
+                        setHistoryStack,
+                        idColorMap,
+                        setHoverRoute,
+                        setIsChannelPopupOpen,
+                        communities
+                    )
+                    }
+                    {hoverRoute &&
+                        <ChannelPopup
+                            isFromHover={true}
+                            color={idColorMap[hoverRoute.uniqueID]}
+                            isOpen={isChannelPopupOpen}
+                            handleClose={setIsChannelPopupOpen}
+                            channel={hoverRoute}
+                            fixed={false}></ChannelPopup>}
                 </div>}
+                {view === "ROUTE" && scopedMarker && <div id="route-points">
 
-
-                {view === "ROUTE" && (selectedRoute) && <div id="route-points">
-
-
-                    <Source id="routes" type="geojson" data={createLineGeoJson(selectedRoute.contents)}>
-                        {<Layer {...createLayer(idColorMap[routePoints[0].id], routePoints[0].id)}></Layer>}
-                    </Source>
-                    {scopedMarker && renderRoutePoints(
-                        selectedRoute.contents,
+                    {renderRouteView(
+                        historyStack,
                         scopedMarker,
-                        idColorMap[selectedRoute.contents[0].id] === COLORS[0] ? routeAssets[0] : routeAssets[1],
                         setScopedMarker,
-                        idColorMap[selectedRoute.contents[0].id],
-                        setIsContentPopupOpen
+                        idColorMap,
+                        communities
                     )}
-
-                    {scopedMarker && <ContentPopup
-                        onNextArrowClick={() => {
-                            setScopedMarker(cycle(scopedMarker, routePoints, "UP"))
-                        }}
-                        onPrevArrowClick={() => {
-                            setScopedMarker(cycle(scopedMarker, routePoints, "DOWN"))
-                        }}
-                        isOpen={isContentPopupOpen} onClose={setIsContentPopupOpen} content={scopedMarker} ></ContentPopup>}
+                    {scopedMarker &&
+                        <ContentPopup
+                            onNextArrowClick={() => { setScopedMarker(cycle(scopedMarker,(peek(historyStack).selectedElement as ChannelType).contents, "UP")) }}
+                            onPrevArrowClick={() => { setScopedMarker(cycle(scopedMarker, (peek(historyStack).selectedElement as ChannelType).contents, "DOWN")) }}
+                            isOpen={isContentPopupOpen}
+                            onClose={setIsContentPopupOpen}
+                            content={scopedMarker}
+                            color={idColorMap[scopedMarker.id]}
+                        ></ContentPopup>}
                 </div>}
 
 
-                {
-                    historyStack && historyStack.length > 1 &&
+                {historyStack && historyStack.length > 1 &&
                     <Button sx={{
                         position: "absolute",
                         top: "50px",
@@ -336,21 +287,19 @@ export const BaseMap: React.FC<MapProps> = ({
                         zIndex: 10,
                         color: "black"
                     }} onClick={() => {
-
                         setHistoryStack((prev: HistoryStack) => {
                             return pop([...prev])
                         })
                     }}>
-                        <Typography variant="body1" sx={{ fontFamily: "BriemScript", fontWeight: 800 }}>Back</Typography>
-
+                        <Typography variant="body1" sx={{ fontFamily: "Source Serif", fontWeight: 800 }}>Back</Typography>
                     </Button>
                 }
 
-                {
-                    <div style={{ position: "absolute", top: "50px", right: '150px' }}>
-                        <MenuOptions />
-                    </div>
-                }
+
+                <div style={{ position: "absolute", top: "50px", right: '150px' }}>
+                    <MenuOptions />
+                </div>
+
 
                 {(overlays) && overlays.map((overlay: Overlay) => {
                     return (

@@ -16,9 +16,9 @@ export function getStateJson(community:ChannelType): Record<string,any> {
     return obj
 }
 
-export function createPolygonLayer():FillLayer{
+export function createPolygonLayer(id:string):FillLayer{
     return {
-        id: 'states',
+        id: id,
         type: 'fill',
         source: 'routes',
         paint: {

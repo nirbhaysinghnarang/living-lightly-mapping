@@ -8,11 +8,10 @@ interface DynMenuProps {
     states: State[],
     idColorMap: Record<string, string>,
     setHistory: React.Dispatch<React.SetStateAction<HistoryStack>>
-    setSelectedRoute:  React.Dispatch<React.SetStateAction<ChannelType>>,
     setScopedMarker: React.Dispatch<React.SetStateAction<ChannelContent>>
 }
 
-export const DynMenu = ({ history, topOfStack, states, idColorMap, setHistory, setSelectedRoute, setScopedMarker }: DynMenuProps) => {
+export const DynMenu = ({ history, topOfStack, states, idColorMap, setHistory, setScopedMarker   }: DynMenuProps) => {
 
 
     const renderMenuContent = (history: HistoryStack, topOfStack: HistoryStackElement, states: State[], isWhite: boolean) => {
@@ -61,8 +60,6 @@ export const DynMenu = ({ history, topOfStack, states, idColorMap, setHistory, s
 
             </Stack>
         }
-
-
         if (topOfStack.view === 'COMM') {
             const community = topOfStack.selectedElement as ChannelType
             const state = states.find(state=> state.communities.includes(community))
@@ -86,7 +83,12 @@ export const DynMenu = ({ history, topOfStack, states, idColorMap, setHistory, s
                     return <Button
                     sx={{justifyContent:"left", textTransform:"none"}}
                     onClick={() => {
-                        setSelectedRoute(route)
+                        setHistory((p: HistoryStack) => {
+                                return append([...p], {
+                                    view: 'ROUTE',
+                                    selectedElement: route
+                                })
+                            })
                     }}
                         >
                         <Typography sx={{ color: '#38424D',fontFamily: "Lato" }} >{route.name}</Typography>
@@ -110,7 +112,7 @@ export const DynMenu = ({ history, topOfStack, states, idColorMap, setHistory, s
                 {route.contents.map(routePoint => <Button
                     sx={{justifyContent:"left", textTransform:"none"}}
                     onClick={() => {
-                       setScopedMarker(routePoint)
+                      setScopedMarker(routePoint)
                     }}
                 >
                     <Typography sx={{ color: '#38424D', fontFamily: "Lato" }} >{routePoint.title}</Typography>
@@ -121,9 +123,6 @@ export const DynMenu = ({ history, topOfStack, states, idColorMap, setHistory, s
     }
     const isColorSpecified = topOfStack.view === 'COMM' || topOfStack.view === 'ROUTE'
     let specColor = '#f6f6f2'
-    // if (topOfStack.view === 'COMM' || topOfStack.view === 'ROUTE') {
-    //     specColor = isColorSpecified ? idColorMap[(topOfStack.selectedElement as ChannelType).uniqueID] : '#f6f6f2'
-    // }
     return <Card sx={{ padding: "10px",maxWidth:"300px",  background: specColor }}>
         {renderMenuContent(history, topOfStack, states, isColorSpecified)}
     </Card>

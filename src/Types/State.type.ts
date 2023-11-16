@@ -33,10 +33,10 @@ function deduplicateStates(states: State[]): State[] {
 export function constructStates(communities: ChannelType[]): State[] {
 
     const stateJsons: Record<string, any>[] = getStatesJson(communities);
-
+    console.log(stateJsons)
     const states = stateJsons.map((json: Record<string, any>) => {
         return {
-            name: json["properties"]["VARNAME_1"],
+            name: json["properties"]["NAME_1"],
             features: json["geometry"],
             communities: [],
             center: center(json["geometry"])

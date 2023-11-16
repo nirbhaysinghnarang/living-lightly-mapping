@@ -1,7 +1,7 @@
 import { NavigateNext } from "@mui/icons-material";
 import { Typography } from "@mui/material";
 import Breadcrumbs from '@mui/material/Breadcrumbs';
-import { ChannelType } from "../../Types/Channel.types";
+import { ChannelContent, ChannelType } from "../../Types/Channel.types";
 import { HistoryStack, HistoryStackElement } from "../../Types/History.stack.type";
 import { State } from "../../Types/State.type";
 interface MapBreadCrumbsProps{
@@ -14,6 +14,7 @@ export const MapBreadCrumbs:React.FC<MapBreadCrumbsProps> = ({history}:MapBreadC
         if(elem.view === 'STATE') return (elem.selectedElement as State).name
         if(elem.view === 'COMM') return (elem.selectedElement as ChannelType).name
         if(elem.view === 'ROUTE') return (elem.selectedElement as ChannelType).name
+        if(elem.view === 'POINT') return (elem.selectedElement as ChannelContent).title
     }
 
 

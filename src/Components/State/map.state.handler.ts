@@ -3,7 +3,7 @@ import { BoxBound, padBounds } from "../../Types/Bounds.type";
 import { ChannelContent, ChannelType } from "../../Types/Channel.types";
 import { HistoryStackElement, selectedElementString } from "../../Types/History.stack.type";
 import { Overlay } from "../../Types/Overlay.type";
-import { State, getNestedRoutes, getStateBounds } from "../../Types/State.type";
+import { State, getStateBounds } from "../../Types/State.type";
 import { getType } from "../../Types/TypeChecks";
 import { VIEWMODE } from "../../Types/ViewMode.type";
 import { getZoomLevel } from "../Map/Geometry/getZoomLevel";
@@ -15,9 +15,9 @@ import { panTo } from "../Map/map.utils";
  */
 export function setBounds
 (element: HistoryStackElement, 
-    mapRef: React.RefObject<MapRef>, 
-    setOverlays: (overlays: Overlay[]) => void,
-    idBoundsMap: Record<string, BoxBound>) {
+mapRef: React.RefObject<MapRef>, 
+setOverlays: (overlays: Overlay[]) => void,
+idBoundsMap: Record<string, BoxBound>) {
     if (mapRef.current) {
         const zoomLevel = getZoomLevel(element.view)
         let mapBounds: BoxBound
@@ -30,11 +30,8 @@ export function setBounds
                 mapBounds = getStateBounds(element.selectedElement as State)
                 break
             case "ChannelType":
-
                 setOverlays(((element.selectedElement) as ChannelType).overlays)
                 mapBounds = idBoundsMap[(element.selectedElement as ChannelType).uniqueID]
-                console.log(mapBounds)
-
                 break
             case "ChannelContent":
                 setOverlays([]);
@@ -43,8 +40,10 @@ export function setBounds
                 break
         }
         if (isJump) {
+            console.log("panning to " + jumpDestination)
             panTo(jumpDestination, zoomLevel, mapRef)
         } else {
+            console.log("fitting bounds to" + mapBounds)
             mapRef.current.fitBounds(padBounds(mapBounds, 1.8))
         }
     }
@@ -78,15 +77,13 @@ export function updateState(
     element: HistoryStackElement,
     setSelectedCommunity: (comm: ChannelType) => void,
     setSelectedRoute: (point: ChannelType) => void,
-    setShowMenu: (show: boolean) => void,
     setScopedMarker: (marker: ChannelContent) => void,
-    setRouteStartPoints: (points: ChannelContent[]) => void,
     setRoutePoints: (points: ChannelContent[]) => void,
     setOverlays: (overlays: Overlay[]) => void,
     setRoutes: (routes: ChannelType[]) => void,
     setView: (view: VIEWMODE) => void,
     routes: ChannelType[],
-    setStateRoutes:(routes:ChannelType[])=>void
+    stateRouteMap:Record<string, ChannelType[]>
 ) {
     setView(element.view)
     const typeOfTop: selectedElementString = getType(element.selectedElement)
@@ -98,21 +95,16 @@ export function updateState(
             setRoutes([])
             setSelectedRoute(null)
             setScopedMarker(null)
-            setRouteStartPoints([])
             setRoutePoints([])
             setRoutes([])
-            setShowMenu(false);
-            setStateRoutes(getNestedRoutes(state))
             break;
 
         case "ChannelType":
             const channelType = (element.selectedElement) as ChannelType
             const isCommunity = element.view === "COMM"
-            
             if (isCommunity) {
                 setSelectedCommunity(channelType)
                 setRoutes(channelType.children)
-                setRouteStartPoints(channelType.children.map((child: ChannelType) => child.contents.at(0)))
                 setSelectedRoute(null)
                 setScopedMarker(null)
                 setRoutePoints([]);
@@ -121,10 +113,8 @@ export function updateState(
                 setSelectedCommunity(null)
                 setRoutes([])
                 setScopedMarker((element.selectedElement as ChannelType).contents.at(0))
-                setRouteStartPoints([])
                 setRoutePoints(channelType.contents)
             }
-            setShowMenu(false)
             setOverlays(channelType.overlays)
             break
         case "ChannelContent":
@@ -134,10 +124,8 @@ export function updateState(
             setRoutes([])
             setSelectedRoute(null)
             setScopedMarker(channelContent)
-            setRouteStartPoints([])
             setRoutePoints(routes.find((route: ChannelType) => route.contents.at(0).id === channelContent.id).contents)
             setRoutes([])
-            setShowMenu(false);
             break
     }
 
