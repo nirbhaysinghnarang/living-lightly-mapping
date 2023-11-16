@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import React, { ReactNode } from "react";
 import { Layer, MapRef, Marker, Source } from 'react-map-gl';
 import { Asset } from '../../Types/Asset.type';
@@ -100,32 +100,37 @@ export function renderRoutePoints(routePoints: ChannelContent[], scopedMarker: C
     return (
         <>
             {routePoints.map((marker: ChannelContent) => {
-                return <div key={marker.id} onClick={(e) => { setScopedMarker(marker); setIsContentPopupOpen(true) }}>
+                return <Stack
+                    
+                    key={marker.id}
+                    onClick={(e:any) => { setScopedMarker(marker); setIsContentPopupOpen(true) }}
+                    direction={"row"}
+                    justifyContent={"center"}
+                    alignContent={"center"}
+                >
                     <Marker
                         longitude={marker.long}
                         latitude={marker.lat}
-
                         style={{
                             cursor: 'pointer',
                             zIndex: 10,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'center',
                         }}
                     >
-                        {(scopedMarker.id === marker.id) ? (
-                            <>
-                                <img src={image.url} style={{ margin: 'auto', width: '30px', }} /> {/* Apply native styles */}
-                                <p style={{ fontFamily: 'Source Serif', color: color, fontSize: '20px', fontWeight: 700 }}>{marker.tags.length > 0 ? marker.tags[0].tag : ""}</p> {/* Apply native styles */}
-                            </>
-                        ) : (
-                            <>
-                                <img src={image.url} style={{ margin: 'auto', width: '20px', }} /> {/* Apply native styles */}
-                                <p style={{ fontFamily: 'Source Serif', color: color, fontSize: '18px' }}>{marker.tags.length > 0 ? marker.tags[0].tag :""}</p>
-                            </>
-                        )}
+                        <Stack justifyContent="center"  style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginLeft:"45%" }}>
+                            {(scopedMarker.id === marker.id) ? (
+                                <>
+                                    <img src={image.url} style={{ marginRight: '10px', width: '30px' }} />
+                                    <p style={{ fontFamily: 'Source Serif', color: color, fontSize: '20px', fontWeight: 700 }}>{marker.tags.length > 0 ? marker.tags[0].tag : ""}</p>
+                                </>
+                            ) : (
+                                <>
+                                    <img src={image.url} style={{ marginRight: '10px', width: '20px' }} />
+                                    <p style={{ fontFamily: 'Source Serif', color: color, fontSize: '18px' }}>{marker.tags.length > 0 ? marker.tags[0].tag : ""}</p>
+                                </>
+                            )}
+                        </Stack>
                     </Marker>
-                </div>
+                </Stack>
             }
 
             )}
@@ -183,9 +188,9 @@ function renderRoutes(
 }
 function renderRouteLayers(routes: ChannelType[], idColorMap: Record<string, string>) {
 
-   return <>
+    return <>
         {routes.map((route: ChannelType) => {
-            return <Source id={`route-${route.uniqueID}`}type="geojson" data={createLineGeoJson(route.contents)}>
+            return <Source id={`route-${route.uniqueID}`} type="geojson" data={createLineGeoJson(route.contents)}>
                 <Layer {...createLayer(idColorMap[route.uniqueID], route.uniqueID)}></Layer>
             </Source>
 
