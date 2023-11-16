@@ -6,7 +6,6 @@ import { Overlay } from "../../Types/Overlay.type";
 import { State, getNestedRoutes, getStateBounds } from "../../Types/State.type";
 import { getType } from "../../Types/TypeChecks";
 import { VIEWMODE } from "../../Types/ViewMode.type";
-import { getBounds } from "../Map/Geometry/getBounds";
 import { getZoomLevel } from "../Map/Geometry/getZoomLevel";
 import { panTo } from "../Map/map.utils";
 /**
@@ -14,7 +13,11 @@ import { panTo } from "../Map/map.utils";
  * the stack that contains the history of a users interactions with a map is
  * changed
  */
-export function setBounds(element: HistoryStackElement, mapRef: React.RefObject<MapRef>, setOverlays: (overlays: Overlay[]) => void) {
+export function setBounds
+(element: HistoryStackElement, 
+    mapRef: React.RefObject<MapRef>, 
+    setOverlays: (overlays: Overlay[]) => void,
+    idBoundsMap: Record<string, BoxBound>) {
     if (mapRef.current) {
         const zoomLevel = getZoomLevel(element.view)
         let mapBounds: BoxBound
@@ -27,8 +30,11 @@ export function setBounds(element: HistoryStackElement, mapRef: React.RefObject<
                 mapBounds = getStateBounds(element.selectedElement as State)
                 break
             case "ChannelType":
+
                 setOverlays(((element.selectedElement) as ChannelType).overlays)
-                mapBounds = getBounds(element.selectedElement as ChannelType)
+                mapBounds = idBoundsMap[(element.selectedElement as ChannelType).uniqueID]
+                console.log(mapBounds)
+
                 break
             case "ChannelContent":
                 setOverlays([]);

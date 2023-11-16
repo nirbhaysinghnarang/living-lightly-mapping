@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Layer, Map, Marker, Source } from 'react-map-gl';
 import { COLORS } from "../../Constants/Colors/color.mapping.js";
 import { BASE_MAP_BOUNDS } from "../../Constants/map.ts";
+import { BoxBound } from '../../Types/Bounds.type.ts';
 import { ChannelContent, ChannelType } from "../../Types/Channel.types.ts";
 import { HistoryStack, HistoryStackElement, append, initialStackElement, peek, pop } from "../../Types/History.stack.type.ts";
 import { MapProps } from "../../Types/MapProps";
@@ -15,6 +16,7 @@ import { handleClickStateLevel } from "./Events/handleClick.ts";
 import { cycle } from "./Functions/cycle.ts";
 import { fetchData } from "./Functions/fetchData.ts";
 import { createPolygonLayer } from "./Geometry/drawStates.ts";
+import { getBounds } from './Geometry/getBounds.ts';
 import { getZoomLevel } from "./Geometry/getZoomLevel.ts";
 import { createLineGeoJson } from "./Geometry/lineGeoJson.ts";
 import { createLayer } from "./Geometry/routeLayer.ts";
@@ -76,6 +78,7 @@ export const BaseMap: React.FC<MapProps> = ({
         initialStackElement
     ]);
 
+    const [idBoundsMap, setIdBoundsMap] = useState<Record<string, BoxBound>>()
     const recursivelyPopulateColorMap = (communities: ChannelType[]) => {
         const map: Record<string, string> = {};
         const helper = (community: ChannelType, map: Record<string, string>, index: number) => {
@@ -86,10 +89,22 @@ export const BaseMap: React.FC<MapProps> = ({
         }
 
         for (let i = 0; i < communities.length; i++) helper(communities[i], map, i);
-        console.log(map)
         return map;
     }
 
+
+    const populateBoundsMap = (communities:ChannelType[]) =>{
+        const map: Record<string, BoxBound> = {};
+        const helper = (community:ChannelType, map:Record<string, BoxBound>) => {
+            map[community.uniqueID] = getBounds(community)
+            if(community.children) community.children.forEach(child=> helper(child, map))
+        }
+        communities.forEach((community:ChannelType) => helper(community, map))
+        setIdBoundsMap(map)
+    }
+
+
+    
 
 
     /**
@@ -97,10 +112,7 @@ export const BaseMap: React.FC<MapProps> = ({
      */
     const [showMenu, setShowMenu] = useState(false);
     const [zoom, setZoom] = useState(getZoomLevel(view))
-
-
     useEffect(() => { if (hoverCommunity && typeof (hoverRoute) !== "undefined") { setHoverRoutePoints(hoverRoute.contents); setIsChannelPopupOpen(true) } }, [hoverRoute])
-
     /**
      * useEffect Hooks
      */
@@ -111,7 +123,7 @@ export const BaseMap: React.FC<MapProps> = ({
             const stackTop = peek(historyStack)
             setView(stackTop.view)
             updateScrollBehaviour(stackTop, mapRef)
-            setBounds(stackTop, mapRef, setOverlays)
+            setBounds(stackTop, mapRef, setOverlays, idBoundsMap)
             updateState(
                 stackTop,
                 setSelectedCommunity,
@@ -149,7 +161,6 @@ export const BaseMap: React.FC<MapProps> = ({
         }
 
     }, [historyStack])
-
     useEffect(() => {
         fetchData(channelId).then((data) => {
             console.log(data.children)
@@ -160,7 +171,7 @@ export const BaseMap: React.FC<MapProps> = ({
     useEffect(() => {
         if (communities) setStates(constructStates(communities))
         if (communities) setIdColorMap(recursivelyPopulateColorMap(communities))
-
+        if(communities) populateBoundsMap(communities)
     }, [communities])
     useEffect(() => {
         if (selectedCommunity && peek(historyStack).selectedElement !== selectedCommunity) {
@@ -219,9 +230,6 @@ export const BaseMap: React.FC<MapProps> = ({
             )
         }
     }, [scopedMarker])
-
-
-
 
 
 

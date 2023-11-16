@@ -116,12 +116,12 @@ export function renderRoutePoints(routePoints: ChannelContent[], scopedMarker: C
                         {(scopedMarker.id === marker.id) ? (
                             <>
                                 <img src={image.url} style={{ margin: 'auto', width: '30px', }} /> {/* Apply native styles */}
-                                <p style={{ fontFamily: 'Source Serif', color: color, fontSize: '20px', fontWeight: 700 }}>{marker.tags.length > 0 ? marker.tags[0].tag : marker.title}</p> {/* Apply native styles */}
+                                <p style={{ fontFamily: 'Source Serif', color: color, fontSize: '20px', fontWeight: 700 }}>{marker.tags.length > 0 ? marker.tags[0].tag : ""}</p> {/* Apply native styles */}
                             </>
                         ) : (
                             <>
                                 <img src={image.url} style={{ margin: 'auto', width: '20px', }} /> {/* Apply native styles */}
-                                <p style={{ fontFamily: 'Source Serif', color: color, fontSize: '18px' }}>{marker.tags.length > 0 ? marker.tags[0].tag : marker.title}</p>
+                                <p style={{ fontFamily: 'Source Serif', color: color, fontSize: '18px' }}>{marker.tags.length > 0 ? marker.tags[0].tag :""}</p>
                             </>
                         )}
                     </Marker>
