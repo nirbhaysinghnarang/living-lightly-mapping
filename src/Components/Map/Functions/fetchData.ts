@@ -80,3 +80,8 @@ export function extractNestedIds(base:ChannelType){
 export async function getOverlays(id:string){
     getContentForChannel(id).then(r=>console.log(r))
 }
+
+
+export function isVaidChannel(channel:ChannelType){
+    return channel.lat !== null && channel.long !==null
+}

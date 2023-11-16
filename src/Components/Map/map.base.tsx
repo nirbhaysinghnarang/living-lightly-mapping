@@ -79,13 +79,14 @@ export const BaseMap: React.FC<MapProps> = ({
     const recursivelyPopulateColorMap = (communities: ChannelType[]) => {
         const map: Record<string, string> = {};
         const helper = (community: ChannelType, map: Record<string, string>, index: number) => {
-            map[community.uniqueID] = COLORS[index % (COLORS.length - 1)]
+            map[community.uniqueID] = COLORS[index % (COLORS.length)]
             if (!community.children) return
-            if (community.contents) for (const content of community.contents) map[content.id] = COLORS[index % (COLORS.length - 1)]
+            if (community.contents) for (const content of community.contents) map[content.id] = COLORS[index % (COLORS.length )]
             for (const child of community.children) helper(child, map, index)
         }
 
         for (let i = 0; i < communities.length; i++) helper(communities[i], map, i);
+        console.log(map)
         return map;
     }
 
@@ -106,7 +107,6 @@ export const BaseMap: React.FC<MapProps> = ({
 
     //This useEffect hook will automagically set zoom level, proper coordinates, and overlays based on the last element on the stack.
     useEffect(() => {
-        console.log(historyStack)
         if (historyStack && historyStack.length > 1) {
             const stackTop = peek(historyStack)
             setView(stackTop.view)
@@ -152,7 +152,8 @@ export const BaseMap: React.FC<MapProps> = ({
 
     useEffect(() => {
         fetchData(channelId).then((data) => {
-            setCommunities(data.children)
+            console.log(data.children)
+            setCommunities(data.children);
             setZoom(getZoomLevel(view));
         })
     }, [])
@@ -293,10 +294,10 @@ export const BaseMap: React.FC<MapProps> = ({
 
 
                 {view === "ROUTE" && (selectedRoute) && <div id="route-points">
-                 
+
 
                     <Source id="routes" type="geojson" data={createLineGeoJson(selectedRoute.contents)}>
-                        {<Layer {...createLayer(idColorMap[routePoints[0].id])}></Layer>}
+                        {<Layer {...createLayer(idColorMap[routePoints[0].id], routePoints[0].id)}></Layer>}
                     </Source>
                     {scopedMarker && renderRoutePoints(
                         selectedRoute.contents,
@@ -306,15 +307,15 @@ export const BaseMap: React.FC<MapProps> = ({
                         idColorMap[selectedRoute.contents[0].id],
                         setIsContentPopupOpen
                     )}
-                   
-                    {scopedMarker && <ContentPopup 
-                    onNextArrowClick={() => {
-                        setScopedMarker(cycle(scopedMarker, routePoints, "UP"))
-                    }}
-                    onPrevArrowClick={() => {
-                        setScopedMarker(cycle(scopedMarker, routePoints, "DOWN"))
-                    }}
-                    isOpen={isContentPopupOpen} onClose={setIsContentPopupOpen} content={scopedMarker} ></ContentPopup>}
+
+                    {scopedMarker && <ContentPopup
+                        onNextArrowClick={() => {
+                            setScopedMarker(cycle(scopedMarker, routePoints, "UP"))
+                        }}
+                        onPrevArrowClick={() => {
+                            setScopedMarker(cycle(scopedMarker, routePoints, "DOWN"))
+                        }}
+                        isOpen={isContentPopupOpen} onClose={setIsContentPopupOpen} content={scopedMarker} ></ContentPopup>}
                 </div>}
 
 

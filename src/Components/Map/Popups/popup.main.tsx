@@ -89,11 +89,11 @@ export const ContentPopup: React.FC<ContentPopupProps> = ({
             <Stack direction="column" flex={1} justifyContent={"flex-end"} alignItems={"flex-end"} >
 
                 <Stack direction={"column"} sx={{ width: "100%" }} alignItems={"flex-start"}>
-                    <Stack direction={"row"} alignContent={"center"} justifyContent={"space-between"} width={"100%"}>
-                    <Typography color="white" variant="body1" sx={{ fontFamily: "Georgia", color: "#38424D", fontSize: "18px", width: "100%", fontWeight: 'bold' }}>
-                        {content.title}
-                    </Typography>
-                        <Stack direction={"row"} alignContent={"center"}>
+                    <Stack direction={"row"} alignItems="center" alignContent={"center"} justifyContent={"space-between"} width={"100%"}>
+                        <Typography color="white" variant="body1" sx={{ fontFamily: "Georgia", color: "#38424D", fontSize: "18px", width: "100%", fontWeight: 'bold' }}>
+                            {content.title}
+                        </Typography>
+                        <Stack direction={"row"} alignContent={"center"} sx={{width:"100%"}}>
                             <IconButton onClick={() => onPrevArrowClick()}>
                                 <KeyboardArrowLeftIcon sx={{ color: "#B39559" }}></KeyboardArrowLeftIcon>
                             </IconButton>
@@ -101,6 +101,7 @@ export const ContentPopup: React.FC<ContentPopupProps> = ({
                                 <KeyboardArrowRightIcon sx={{ color: "#B39559" }}></KeyboardArrowRightIcon>
                             </IconButton>
                             <IconButton onClick={() => { onClose(false) }}>
+                            
                                 <Cancel sx={{ color: "#B39559" }}></Cancel>
                             </IconButton>
 

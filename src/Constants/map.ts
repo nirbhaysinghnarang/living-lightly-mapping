@@ -12,7 +12,7 @@ const BASE_MAP_ASSET_LIST: string[] = [
     "ROUTE_1",
     "ROUTE_2",
     "ROUTE_1_SEL",
-    "ROUTE_1_SEL"
+    "ROUTE_2_SEL"
 ] 
 
 const BASE_MAP_ASSETS = CONSTANT_ASSETS.filter(asset=>BASE_MAP_ASSET_LIST.includes(asset.id));

@@ -1,4 +1,4 @@
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import React, { ReactNode } from "react";
 import { Layer, MapRef, Marker, Source } from 'react-map-gl';
 import { Asset } from '../../Types/Asset.type';
@@ -100,7 +100,6 @@ export function renderRoutePoints(routePoints: ChannelContent[], scopedMarker: C
     return (
         <>
             {routePoints.map((marker: ChannelContent) => {
-                console.log(marker, scopedMarker)
                 return <div key={marker.id} onClick={(e) => { setScopedMarker(marker); setIsContentPopupOpen(true) }}>
                     <Marker
                         longitude={marker.long}
@@ -117,12 +116,12 @@ export function renderRoutePoints(routePoints: ChannelContent[], scopedMarker: C
                         {(scopedMarker.id === marker.id) ? (
                             <>
                                 <img src={image.url} style={{ margin: 'auto', width: '30px', }} /> {/* Apply native styles */}
-                                <p style={{ fontFamily: 'Source Serif', color: color, fontSize: '20px', fontWeight: 700 }}>{marker.title}</p> {/* Apply native styles */}
+                                <p style={{ fontFamily: 'Source Serif', color: color, fontSize: '20px', fontWeight: 700 }}>{marker.tags.length > 0 ? marker.tags[0].tag : marker.title}</p> {/* Apply native styles */}
                             </>
                         ) : (
                             <>
                                 <img src={image.url} style={{ margin: 'auto', width: '20px', }} /> {/* Apply native styles */}
-                                <p style={{ fontFamily: 'Source Serif', color: color, fontSize: '18px' }}>{marker.title}</p>
+                                <p style={{ fontFamily: 'Source Serif', color: color, fontSize: '18px' }}>{marker.tags.length > 0 ? marker.tags[0].tag : marker.title}</p>
                             </>
                         )}
                     </Marker>
@@ -163,26 +162,13 @@ function renderRoutes(
                     }}
                 >
                     {index === 0 &&
-
-                    <Stack direction="column" alignContent={"center"} justifyContent={"center"}>
-                        <Button variant="contained" sx={{backgroundColor:idColorMap[route.uniqueID],
-                        ':hover': {
-                            bgcolor: idColorMap[route.uniqueID], // theme.palette.primary.main
-                            scale:1.6,
-                            transition: 'scale 1s'
-                          }}}
-                             onMouseEnter={() => { setHoverRoute(route); displayPopup(true) }}
-                             onMouseLeave={() => { setHoverRoute(null); displayPopup(false) }}
-                             onClick={() => { console.log("clicked"); setSelectedRoute(route) }}
-                             
+                        <div
+                            onMouseEnter={() => { setHoverRoute(route); displayPopup(true) }}
+                            onMouseLeave={() => { setHoverRoute(null); displayPopup(false) }}
+                            onClick={() => { setSelectedRoute(route) }}
                         >
-                            <Typography variant="body1" sx={{color:'white', fontFamily:"Source Serif"}}></Typography>
-                            Start here
-                            </Button>
-                       
-                    </Stack>
-                       
-                    }
+                            <img src={imageHighlighted.url} style={{ margin: 'auto', width: '30px' }} alt="route-pt" />
+                        </div>}
                     {index !== 0 && <div >
                         <img src={image.url} style={{ margin: 'auto', width: '20px' }} alt="route-pt" />
                     </div>}
@@ -196,42 +182,45 @@ function renderRoutes(
     })
 }
 function renderRouteLayers(routes: ChannelType[], idColorMap: Record<string, string>) {
-    return routes.map((route: ChannelType) => {
-        return <Source id="routes" type="geojson" data={createLineGeoJson(route.contents)}>
-            <Layer {...createLayer(idColorMap[route.uniqueID])}></Layer>
-        </Source>
 
-    })
+   return <>
+        {routes.map((route: ChannelType) => {
+            return <Source id={`route-${route.uniqueID}`}type="geojson" data={createLineGeoJson(route.contents)}>
+                <Layer {...createLayer(idColorMap[route.uniqueID], route.uniqueID)}></Layer>
+            </Source>
+
+        })}
+    </>
+
 }
 
-export function renderState( 
-    state: State, 
+export function renderState(
+    state: State,
     idColorMap: Record<string, string>,
     routeAssets: Asset[],
     routeAssetsSelected: Asset[],
     setHoverRoute: (route: ChannelType) => void,
     displayPopup: (show: boolean) => void,
-    setSelectedRoute: (route: ChannelType) => void){
-        const routes = getNestedRoutes(state)
-        return<>
+    setSelectedRoute: (route: ChannelType) => void) {
+    const routes = getNestedRoutes(state)
+    return <>
         {renderRoutes(routes, idColorMap, routeAssets, routeAssetsSelected, setHoverRoute, displayPopup, setSelectedRoute)}
         {renderRouteLayers(routes, idColorMap)}
-        </>
-        
-    }
+    </>
+
+}
 
 
 export function renderCommunity(
-    community: ChannelType, 
+    community: ChannelType,
     idColorMap: Record<string, string>,
     routeAssets: Asset[],
     routeAssetsSelected: Asset[],
     setHoverRoute: (route: ChannelType) => void,
     displayPopup: (show: boolean) => void,
-    setSelectedRoute: (route: ChannelType) => void){
+    setSelectedRoute: (route: ChannelType) => void) {
     return <>
-    {renderRoutes(community.children, idColorMap, routeAssets, routeAssetsSelected, setHoverRoute, displayPopup, setSelectedRoute)}
-    {renderRouteLayers(community.children, idColorMap)}
-        {/* <CommunityPopup community={community} idColorMap={idColorMap}></CommunityPopup> */}
+        {renderRoutes(community.children, idColorMap, routeAssets, routeAssetsSelected, setHoverRoute, displayPopup, setSelectedRoute)}
+        {renderRouteLayers(community.children, idColorMap)}
     </>
 }

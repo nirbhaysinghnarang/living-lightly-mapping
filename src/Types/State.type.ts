@@ -14,6 +14,21 @@ export type State = {
     center: Feature<Point>
 }
 
+function deduplicateStates(states: State[]): State[] {
+    if (!states || states.length === 0) return states;
+
+    const sortedStates = states.sort((thisState, thatState) => thisState.name.localeCompare(thatState.name));
+
+    const uniqueStates = sortedStates.reduce((unique, current) => {
+        const isDuplicate = unique.find(state => state.name === current.name);
+        if (!isDuplicate) {
+            unique.push(current);
+        }
+        return unique;
+    }, [] as State[]);
+
+    return uniqueStates;
+}
 
 export function constructStates(communities: ChannelType[]): State[] {
 
@@ -36,8 +51,11 @@ export function constructStates(communities: ChannelType[]): State[] {
             }
         }
     }
-    return states
+    return deduplicateStates(states)
 }
+
+
+
 
 /**
  * 
@@ -61,8 +79,7 @@ export function getStateBounds(state:State): BoxBound{
         stateBounds.minLat = Math.min(stateBounds.minLat, communityBounds.minLat)
         stateBounds.maxLat = Math.max(stateBounds.maxLat, communityBounds.maxLat)
     })
-
-   return  get2DBounds(stateBounds)
+    return get2DBounds(stateBounds)
 
 }
 

@@ -1,8 +1,8 @@
 import { LineLayer } from "mapbox-gl";
-
-export function createLayer(color:string|undefined):LineLayer {
+export function createLayer(color:string|undefined, id:string):LineLayer {
+    console.log(id)
     return {
-        id: 'routes',
+        id: `route${id}`,
         type: 'line',
         source: 'routes',
         layout: {
