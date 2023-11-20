@@ -17,7 +17,7 @@ export const DynMenu = ({ history, topOfStack, states, idColorMap, setHistory, s
     const renderMenuContent = (history: HistoryStack, topOfStack: HistoryStackElement, states: State[], isWhite: boolean) => {
         if (topOfStack.view === 'IND') {
             return <Stack direction="column" spacing={1}>
-                <Typography variant="body1" sx={{ fontFamily: "Source Serif", color: isWhite ? 'white' : "#191c1b", fontSize: "18px", width: "100%" }}>
+                <Typography variant="body1" sx={{ fontWeight:"bold",fontFamily: "Source Serif", color: isWhite ? 'white' : "#191c1b", fontSize: "18px", width: "100%" }}>
                     Indian Peninsular Map
                 </Typography>
                 {states.map(state => <Button
@@ -38,7 +38,7 @@ export const DynMenu = ({ history, topOfStack, states, idColorMap, setHistory, s
         if (topOfStack.view === "STATE") {
             const state = topOfStack.selectedElement as State
             return <Stack direction="column" spacing={1}>
-                <Typography variant="body1" sx={{ fontFamily: "Source Serif", color: "#191c1b", fontSize: "18px", width: "100%" }}>
+                <Typography variant="body1" sx={{ fontWeight:"bold",fontFamily: "Source Serif", color: "#191c1b", fontSize: "18px", width: "100%" }}>
                     Communities in {`${state.name}`}
                 </Typography>
                 {state.communities.map(community => {
@@ -100,7 +100,7 @@ export const DynMenu = ({ history, topOfStack, states, idColorMap, setHistory, s
         if (topOfStack.view === "ROUTE") {
             const route = topOfStack.selectedElement as ChannelType
             return <Stack direction="column" spacing={1}>
-                <Typography variant="body1" sx={{ fontFamily: "Source Serif", color: "#38424D", fontSize: "18px", width: "100%" }}>
+                <Typography variant="body1" sx={{fontWeight:"bold", fontFamily: "Source Serif", color: "#38424D", fontSize: "18px", width: "100%" }}>
                     {`Explore ${route.name}`}
                 </Typography>
                 <Typography  variant="subtitle2" sx={{ fontFamily: 'Lato', fontSize: "16px", color: '#38424D', marginTop: 1, width:"100%" }}>

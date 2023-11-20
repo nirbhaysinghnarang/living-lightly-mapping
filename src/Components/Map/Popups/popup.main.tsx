@@ -29,6 +29,8 @@ interface CommunityPopupProps {
 
 export const ChannelPopup: React.FC<ChannelPopupProps> = ({ channel, fixed, isOpen, handleClose, color, isFromHover }: ChannelPopupProps) => {
     document.documentElement.style.setProperty('--popup-background-color', color);
+    document.documentElement.style.setProperty('--popup-width', "auto")
+
     if (!isOpen) return <></>
     function _renderContents() {
         return (<Stack direction="column" flex={1} justifyContent={"flex-start"} alignItems={"flex-start"}>
@@ -77,6 +79,8 @@ export const ContentPopup: React.FC<ContentPopupProps> = ({
 }: ContentPopupProps) => {
     if (!content || !isOpen) return;
     document.documentElement.style.setProperty('--popup-background-color', "#F6F5F1");
+    document.documentElement.style.setProperty('--popup-width', "405px")
+
 
     return (
         <Popup
@@ -86,14 +90,14 @@ export const ContentPopup: React.FC<ContentPopupProps> = ({
             closeButton={false}
 
             latitude={content.lat} longitude={content.long} offset={50} style={{ padding: 20, zIndex: 10, color: "#f6f6f2" }}>
-            <Stack direction="column" flex={1} justifyContent={"flex-end"} alignItems={"flex-end"} >
+            <Stack direction="column" sx={{ width: "100%", height:'100%' }} flex={1} justifyContent={"flex-end"} alignItems={"flex-end"} >
 
                 <Stack direction={"column"} sx={{ width: "100%" }} alignItems={"flex-start"}>
-                    <Stack direction={"row"} alignItems="center" alignContent={"center"} justifyContent={"space-between"} width={"100%"}>
+                    <Stack direction={"row"} sx ={{width:"100%"}}alignItems="center" alignContent={"center"} justifyContent={"space-between"}>
                         <Typography color="white" variant="body1" sx={{ fontFamily: "Georgia", color: "#38424D", fontSize: "18px", width: "100%", fontWeight: 'bold' }}>
                             {content.title}
                         </Typography>
-                        <Stack direction={"row"} alignContent={"center"} sx={{width:"100%"}}>
+                        <Stack direction={"row"} alignContent={"center"} justifyContent={"space-between"} sx={{width:"100%"}}>
                             <IconButton onClick={() => onPrevArrowClick()}>
                                 <KeyboardArrowLeftIcon sx={{ color: "#B39559" }}></KeyboardArrowLeftIcon>
                             </IconButton>

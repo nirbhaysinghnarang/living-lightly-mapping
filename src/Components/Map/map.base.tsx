@@ -1,9 +1,12 @@
-import { Box, Button, Typography } from '@mui/material';
+import { ArrowCircleLeftTwoTone } from '@mui/icons-material';
+import { Box, IconButton } from '@mui/material';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import React, { useEffect, useRef, useState } from 'react';
 import { Layer, Map, Marker, Source } from 'react-map-gl';
 import { COLORS } from "../../Constants/Colors/color.mapping.js";
 import { BASE_MAP_BOUNDS } from '../../Constants/map.ts';
+import { cycle } from "../../Functions/cycle.ts";
+import { fetchData } from "../../Functions/fetchData.ts";
 import { BoxBound } from '../../Types/Bounds.type.ts';
 import { ChannelContent, ChannelType } from "../../Types/Channel.types.ts";
 import { HistoryStack, HistoryStackElement, append, initialStackElement, peek, pop } from "../../Types/History.stack.type.ts";
@@ -13,8 +16,6 @@ import { State, constructStates, getNestedRoutes } from "../../Types/State.type.
 import { VIEWMODE } from "../../Types/ViewMode.type.ts";
 import { setBounds, updateScrollBehaviour } from "../State/map.state.handler.ts";
 import { handleClickStateLevel } from "./Events/handleClick.ts";
-import { cycle } from "./Functions/cycle.ts";
-import { fetchData } from "./Functions/fetchData.ts";
 import { createPolygonLayer } from "./Geometry/drawStates.ts";
 import { getBounds } from './Geometry/getBounds.ts';
 import { getZoomLevel } from "./Geometry/getZoomLevel.ts";
@@ -45,10 +46,8 @@ export const BaseMap: React.FC<MapProps> = ({
 
     // UI State
     const [hoverRoute, setHoverRoute] = useState<ChannelType>(null);
-    const [selectedRoute, setSelectedRoute] = useState<ChannelType>(null)
     const [scopedMarker, setScopedMarker] = useState<ChannelContent>(null);
-
-
+    
     //Popup State
     const [isContentPopupOpen, setIsContentPopupOpen] = useState<boolean>(false);
     const [isChannelPopupOpen, setIsChannelPopupOpen] = useState<boolean>(false);
@@ -56,23 +55,23 @@ export const BaseMap: React.FC<MapProps> = ({
     //Data State
     const [states, setStates] = useState<State[]>([]);
     const [communities, setCommunities] = useState<ChannelType[]>(null);
-    const [routes, setRoutes] = useState<ChannelType[]>(null);
 
-
-
-    const [selectedCommunity, setSelectedCommunity] = useState<ChannelType>(null);
     const [view, setView] = useState<VIEWMODE>("IND");
-    const [hoverCommunity, setHoverCommunity] = useState<ChannelType>(null);
     const [overlays, setOverlays] = useState<Overlay[]>([]);
     const [historyStack, setHistoryStack] = useState<HistoryStack>([]);
-    /**
-     * Cached data stores
+
+
+    /** 
+     * Cached data stores to avoid expensive recomputation
      */
     const [stateRouteMap, setStateRouteMap] = useState<Record<string, ChannelType[]>>()
     const [idColorMap, setIdColorMap] = useState<Record<string, string>>()
     const [idBoundsMap, setIdBoundsMap] = useState<Record<string, BoxBound>>()
     const [loaded, setLoaded] = useState(false)
-    const recursivelyPopulateColorMap = (communities: ChannelType[]) => {
+    
+    
+    
+    const recursivelyPopulateColorMap = ( states:State[]) => {
         const map: Record<string, string> = {};
         const helper = (community: ChannelType, map: Record<string, string>, index: number) => {
             map[community.uniqueID] = COLORS[index % (COLORS.length)]
@@ -80,10 +79,21 @@ export const BaseMap: React.FC<MapProps> = ({
             if (community.contents) for (const content of community.contents) map[content.id] = COLORS[index % (COLORS.length)]
             for (const child of community.children) helper(child, map, index)
         }
+        
 
-        for (let i = 0; i < communities.length; i++) helper(communities[i], map, i);
-        setIdColorMap(map);
+        for(const state of states){
+            const comms = state.communities
+            for(let i = 0; i < communities.length; i++){helper(communities[i], map, i);}
+        }
+        setIdColorMap(map)
+        // for (let i = 0; i < communities.length; i++) helper(communities[i], map, i);
+        // setIdColorMap(map);
     }
+
+
+
+
+
     const recursivelyPopulateBoundsMap = (communities: ChannelType[]) => {
         const map: Record<string, BoxBound> = {};
         const helper = (community: ChannelType, map: Record<string, BoxBound>) => {
@@ -123,17 +133,18 @@ export const BaseMap: React.FC<MapProps> = ({
      */
     useEffect(() => {
         if (communities) setStates(constructStates(communities))
-        if (communities) recursivelyPopulateColorMap(communities)
         if (communities) recursivelyPopulateBoundsMap(communities)
     }, [communities])
 
     useEffect(() => {
         if (states) populateStateRouteMap(states)
+        if (states) recursivelyPopulateColorMap(states)
+
     }, [states])
 
     //Once these are computed, we initialize the stack and display the map.
     useEffect(() => {
-        if (stateRouteMap && idBoundsMap && idBoundsMap) setLoaded(true)
+        if (stateRouteMap && idColorMap && idBoundsMap) setLoaded(true)
     }, [stateRouteMap, idBoundsMap, idColorMap])
 
     useEffect(() => { if (loaded) setHistoryStack([initialStackElement]) }, [loaded])
@@ -155,8 +166,6 @@ export const BaseMap: React.FC<MapProps> = ({
         } else {
             panTo([mapCenter.lng, mapCenter.lat], getZoomLevel("IND"), mapRef)
             setView("IND")
-            setSelectedCommunity(null);
-            setSelectedRoute(null);
             mapRef.current && mapRef.current.getMap().setMaxBounds(BASE_MAP_BOUNDS)
         }
 
@@ -177,6 +186,7 @@ export const BaseMap: React.FC<MapProps> = ({
 
 
     if (historyStack.length === 0) return <></>
+
     return (<>
         <Box sx={{ backgroundImage: `url('${MAP_OVERLAY_ASSET?.url}')`, width: '100vw', height: '100vh', backgroundSize: "100vw 100vh", zIndex: 1 }}>
             <Map
@@ -259,7 +269,6 @@ export const BaseMap: React.FC<MapProps> = ({
                             fixed={false}></ChannelPopup>}
                 </div>}
                 {view === "ROUTE" && scopedMarker && <div id="route-points">
-
                     {renderRouteView(
                         historyStack,
                         scopedMarker,
@@ -280,7 +289,7 @@ export const BaseMap: React.FC<MapProps> = ({
 
 
                 {historyStack && historyStack.length > 1 &&
-                    <Button sx={{
+                    <IconButton sx={{
                         position: "absolute",
                         top: "50px",
                         right: "80px",
@@ -291,8 +300,8 @@ export const BaseMap: React.FC<MapProps> = ({
                             return pop([...prev])
                         })
                     }}>
-                        <Typography variant="body1" sx={{ fontFamily: "Source Serif", fontWeight: 800 }}>Back</Typography>
-                    </Button>
+                        <ArrowCircleLeftTwoTone/>
+                    </IconButton>
                 }
 
 
@@ -323,7 +332,6 @@ export const BaseMap: React.FC<MapProps> = ({
                 })}
                 <div style={{ position: 'absolute', bottom: 50, left: 0, width: "100%", backgroundColor: "white", }}>
                     <MapBreadCrumbs history={historyStack}></MapBreadCrumbs>
-
                 </div>
 
             </Map>

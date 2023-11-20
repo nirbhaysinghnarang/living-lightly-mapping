@@ -1,7 +1,7 @@
 import { AxiosResponse } from "axios";
-import { getChannel, getContentForChannel } from "../../../Client/mvc.client";
-import { ChannelType } from "../../../Types/Channel.types";
-import { Overlay, isValidOverlay } from "../../../Types/Overlay.type";
+import { getChannel } from "../Client/mvc.client";
+import { ChannelType } from "../Types/Channel.types";
+import { Overlay, isValidOverlay } from "../Types/Overlay.type";
 
 
 
@@ -76,11 +76,6 @@ export function extractNestedIds(base:ChannelType){
     }
     return recurse(base, [])
 }
-
-export async function getOverlays(id:string){
-    getContentForChannel(id).then(r=>console.log(r))
-}
-
 
 export function isVaidChannel(channel:ChannelType){
     return channel.lat !== null && channel.long !==null

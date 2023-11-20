@@ -1,4 +1,4 @@
-import { ChannelContent } from "../../../Types/Channel.types";
+import { ChannelContent } from "../Types/Channel.types";
 export type dir = "UP" | "DOWN"
 export function cycle(current: ChannelContent, list: ChannelContent[], direction: dir) {
     const index = list.indexOf(current);
