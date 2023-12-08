@@ -28,7 +28,7 @@ export const DynMenu = ({ history, topOfStack, states, idColorMap, setHistory, s
 
 
     const renderHeader = (text:string, history:HistoryStack, setHistory:React.Dispatch<React.SetStateAction<HistoryStack>>, isWhite:boolean) => {
-        return (<Stack direction={"row"} sx={{width:"100%"}} justifyContent={"space-between"} alignItems={"center"}>
+        return (<Stack direction={"row"} sx={{width:"300px"}} justifyContent={"space-between"} alignItems={"center"}>
              <Typography variant="body1" sx={{ fontWeight: "bold", fontFamily: "Source Serif", color: isWhite ? 'white' : "#191c1b", fontSize: "18px", width: "100%" }}>
                    {text}
                 </Typography>
@@ -138,7 +138,7 @@ export const DynMenu = ({ history, topOfStack, states, idColorMap, setHistory, s
     }
     const isColorSpecified = topOfStack.view === 'COMM' || topOfStack.view === 'ROUTE'
     let specColor = '#f6f6f2'
-    return <Card sx={{ padding: "10px", maxWidth: "300px", background: specColor }}>
+    return <Card sx={{ padding: "10px", width: "300px", background: specColor }}>
         <Stack direction="row" alignContent={"flex-start"} justifyContent={"flex-start"}>
             {renderMenuContent(history, topOfStack, states, isColorSpecified)}
           
