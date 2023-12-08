@@ -288,21 +288,7 @@ export const BaseMap: React.FC<MapProps> = ({
                 </div>}
 
 
-                {historyStack && historyStack.length > 1 &&
-                    <IconButton sx={{
-                        position: "absolute",
-                        top: "50px",
-                        right: "80px",
-                        zIndex: 10,
-                        color: "black"
-                    }} onClick={() => {
-                        setHistoryStack((prev: HistoryStack) => {
-                            return pop([...prev])
-                        })
-                    }}>
-                        <ArrowCircleLeftTwoTone/>
-                    </IconButton>
-                }
+                
 
 
                 <div style={{ position: "absolute", top: "50px", right: '150px' }}>
