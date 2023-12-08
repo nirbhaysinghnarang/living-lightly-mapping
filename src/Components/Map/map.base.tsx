@@ -25,8 +25,7 @@ import { DynMenu } from "./map.dyn.menu.tsx";
 import { MenuOptions } from './map.options.menu.tsx';
 import { panTo } from "./map.utils.tsx";
 import { renderCommunityView, renderRouteView, renderStateView } from './map.views.tsx';
-
-
+import { useKeyPress } from "@uidotdev/usehooks";
 
 export const BaseMap: React.FC<MapProps> = ({
     assetList,
@@ -152,6 +151,8 @@ export const BaseMap: React.FC<MapProps> = ({
      * useState hooks for UI management
      */
     const [zoom, setZoom] = useState(getZoomLevel(view))
+
+    useEffect(()=>{console.log(view)}, [view])
     /**
      * useEffect Hooks
      */
@@ -182,6 +183,19 @@ export const BaseMap: React.FC<MapProps> = ({
             )
         }
     }, [scopedMarker])
+
+
+    document.onkeydown = onKeyPress;
+
+
+    function onKeyPress(e:KeyboardEvent){
+        if((e.key === 'ArrowRight' || e.key==='ArrowLeft') && view === 'ROUTE' && scopedMarker!==null){
+            e.preventDefault()
+            const routePoints = (peek(historyStack).selectedElement as ChannelType).contents
+            setScopedMarker(cycle(scopedMarker,(peek(historyStack).selectedElement as ChannelType).contents, 
+            (e.key === 'ArrowRight' ? "UP" : "DOWN" )))
+        }
+    }
 
 
 
@@ -226,7 +240,10 @@ export const BaseMap: React.FC<MapProps> = ({
                             idColorMap={idColorMap}
                             history={historyStack}
                             topOfStack={peek(historyStack)}
-                            states={states} />
+                            states={states}
+                            scopedMarker={scopedMarker}
+                            
+                            />
                     </div>
                 </Box>
                 {view === "IND" && states && states.map((state: State) => {
@@ -284,7 +301,8 @@ export const BaseMap: React.FC<MapProps> = ({
                             onClose={setIsContentPopupOpen}
                             content={scopedMarker}
                             color={idColorMap[scopedMarker.id]}
-                        ></ContentPopup>}
+                        ></ContentPopup>
+                }
                 </div>}
 
 

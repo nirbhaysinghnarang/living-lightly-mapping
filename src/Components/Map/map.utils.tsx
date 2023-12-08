@@ -8,10 +8,13 @@ import { HistoryStack, append, peek } from "../../Types/History.stack.type";
 import { createLineGeoJson } from "./Geometry/lineGeoJson";
 import { createLayer } from "./Geometry/routeLayer";
 export const panTo = (coords: [number, number], zoom: number, mapRef: React.RefObject<MapRef>) => {
+    const latOffset = -0.02; 
+    const adjustedCoords: [number, number] = [coords[0], coords[1] + latOffset];
+
     if (mapRef.current) {
         mapRef.current.flyTo(
             {
-                center: coords, zoom: zoom,
+                center: adjustedCoords, zoom: zoom,
                 speed: 2,
                 curve: 1,
                 easing(t: number) {

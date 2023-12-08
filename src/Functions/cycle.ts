@@ -1,9 +1,9 @@
 import { ChannelContent } from "../Types/Channel.types";
 export type dir = "UP" | "DOWN"
 export function cycle(current: ChannelContent, list: ChannelContent[], direction: dir) {
-    const index = list.indexOf(current);
+    const index = list.findIndex(c=>c.id===current.id)
     if (index === -1) {
-        // Handle the case where the current item is not found in the list.
+        console.log(list, current, 'here')
         return current;
     }
     let newIndex: number;
@@ -15,7 +15,7 @@ export function cycle(current: ChannelContent, list: ChannelContent[], direction
             newIndex = (index - 1 + list.length) % list.length;
             break;
         default:
-            newIndex = index; // Default to the current index for an invalid direction.
+            newIndex = index; 
             break;
     }
     return list[newIndex];
