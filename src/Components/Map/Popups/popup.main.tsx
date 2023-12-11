@@ -4,6 +4,7 @@ import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import { Button, Card, IconButton, Stack, Typography } from "@mui/material";
 import { Popup } from "react-map-gl";
 import { ChannelContent, ChannelType } from "../../../Types/Channel.types";
+import ExpandableImage from "../../Gallery/expandable.image";
 interface ChannelPopupProps {
     channel: ChannelType,
     fixed: boolean,
@@ -44,7 +45,7 @@ export const ChannelPopup: React.FC<ChannelPopupProps> = ({ channel, fixed, isOp
                 </Button>}
             </Stack>
 
-            {channel.picture && <img style={{ height: '100px', width: '100%' }} src={channel.picture.url}></img>}
+            {channel.picture && <ExpandableImage src={channel.picture.url}></ExpandableImage>}
             {fixed && <Typography color="white" variant="subtitle2" sx={{ fontFamily: 'Lato', fontSize: "16px", color: 'white', marginTop: 1 }}>
                 {channel.description}
             </Typography>}
@@ -116,7 +117,7 @@ export const ContentPopup: React.FC<ContentPopupProps> = ({
                         sx={{ fontFamily: "Source Serif", color: "#38424D", }}
                     >{tag.tag}</Typography>)}
 
-                    {content.mediafile && <img style={{ height: '100px' }} src={content.mediafile.url}></img>}
+                    {content.mediafile && <ExpandableImage src={content.mediafile.url}></ExpandableImage>}
                     <Typography color="white" variant="subtitle2" sx={{ fontFamily: 'Lato', fontSize: "16px", color: '#38424D', marginTop: 1 }}>
                         {content.description}
                     </Typography>
@@ -137,7 +138,7 @@ export const CommunityPopup: React.FC<CommunityPopupProps> = ({ community, idCol
                 </Typography>
 
             </Stack>
-            {community.picture && <img style={{ height: '100px', width: '100%' }} src={community.picture.url}></img>}
+            {community.picture && <ExpandableImage style={{ height: '100px', width: '100%' }} src={community.picture.url}></ExpandableImage>}
             <Typography color="white" variant="subtitle2" sx={{ fontFamily: 'Lato', fontSize: "16px", color: 'white', marginTop: 1 }}>
                 {community.description === "" ? "Community Description" : community.description}
             </Typography>

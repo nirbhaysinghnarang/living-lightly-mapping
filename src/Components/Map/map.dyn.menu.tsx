@@ -4,6 +4,7 @@ import { HistoryStack, HistoryStackElement, append, pop } from "../../Types/Hist
 import { State } from "../../Types/State.type";
 import { ArrowCircleLeftTwoTone, ChevronRight, Reply } from "@mui/icons-material";
 import KeyboardIcon from '@mui/icons-material/Keyboard';
+import ExpandableImage from "../Gallery/expandable.image";
 interface DynMenuProps {
     history: HistoryStack,
     topOfStack: HistoryStackElement,
@@ -93,7 +94,7 @@ export const DynMenu = ({ history, topOfStack, states, idColorMap, setHistory, s
                 <Typography variant="body1" sx={{ fontFamily: "Source Serif", color: idColorMap[community.uniqueID], fontSize: "18px", width: "100%" }}>
                     {`${community.name}`}
                 </Typography>
-                {community.picture && <img style={{ height: '200px' }} src={community.picture.url}></img>}
+                {community.picture && <ExpandableImage src={community.picture.url} alt="Community picture"></ExpandableImage>}
                 <Typography variant="subtitle2" sx={{ fontFamily: 'Lato', fontSize: "16px", color: '#38424D', marginTop: 1, width: "100%" }}>
                     {community.description}
                 </Typography>
