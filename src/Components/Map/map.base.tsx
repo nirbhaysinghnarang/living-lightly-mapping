@@ -2,7 +2,7 @@ import { ArrowCircleLeftTwoTone } from '@mui/icons-material';
 import { Box, IconButton } from '@mui/material';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import React, { useEffect, useRef, useState } from 'react';
-import { Layer, Map, Marker, Source } from 'react-map-gl';
+import { Layer, Map, Marker, Projection, Source } from 'react-map-gl';
 import { COLORS } from "../../Constants/Colors/color.mapping.js";
 import { BASE_MAP_BOUNDS } from '../../Constants/map.ts';
 import { cycle } from "../../Functions/cycle.ts";
@@ -25,7 +25,6 @@ import { DynMenu } from "./map.dyn.menu.tsx";
 import { MenuOptions } from './map.options.menu.tsx';
 import { panTo } from "./map.utils.tsx";
 import { renderCommunityView, renderRouteView, renderStateView } from './map.views.tsx';
-import { useKeyPress } from "@uidotdev/usehooks";
 
 export const BaseMap: React.FC<MapProps> = ({
     assetList,
@@ -46,7 +45,7 @@ export const BaseMap: React.FC<MapProps> = ({
     // UI State
     const [hoverRoute, setHoverRoute] = useState<ChannelType>(null);
     const [scopedMarker, setScopedMarker] = useState<ChannelContent>(null);
-    
+
     //Popup State
     const [isContentPopupOpen, setIsContentPopupOpen] = useState<boolean>(false);
     const [isChannelPopupOpen, setIsChannelPopupOpen] = useState<boolean>(false);
@@ -67,10 +66,10 @@ export const BaseMap: React.FC<MapProps> = ({
     const [idColorMap, setIdColorMap] = useState<Record<string, string>>()
     const [idBoundsMap, setIdBoundsMap] = useState<Record<string, BoxBound>>()
     const [loaded, setLoaded] = useState(false)
-    
-    
-    
-    const recursivelyPopulateColorMap = ( states:State[]) => {
+
+
+
+    const recursivelyPopulateColorMap = (states: State[]) => {
         const map: Record<string, string> = {};
         const helper = (community: ChannelType, map: Record<string, string>, index: number) => {
             map[community.uniqueID] = COLORS[index % (COLORS.length)]
@@ -78,21 +77,14 @@ export const BaseMap: React.FC<MapProps> = ({
             if (community.contents) for (const content of community.contents) map[content.id] = COLORS[index % (COLORS.length)]
             for (const child of community.children) helper(child, map, index)
         }
-        
-
-        for(const state of states){
+        for (const state of states) {
             const comms = state.communities
-            for(let i = 0; i < communities.length; i++){helper(communities[i], map, i);}
+            for (let i = 0; i < comms.length; i++) {  helper(comms[i], map, i); }
         }
         setIdColorMap(map)
         // for (let i = 0; i < communities.length; i++) helper(communities[i], map, i);
         // setIdColorMap(map);
     }
-
-
-
-
-
     const recursivelyPopulateBoundsMap = (communities: ChannelType[]) => {
         const map: Record<string, BoxBound> = {};
         const helper = (community: ChannelType, map: Record<string, BoxBound>) => {
@@ -152,18 +144,20 @@ export const BaseMap: React.FC<MapProps> = ({
      */
     const [zoom, setZoom] = useState(getZoomLevel(view))
 
-    useEffect(()=>{console.log(view)}, [view])
+    useEffect(() => { console.log(view) }, [view])
     /**
      * useEffect Hooks
      */
     //This useEffect hook will automagically set zoom level, proper coordinates, and overlays based on the last element on the stack.
     useEffect(() => {
         if (historyStack && historyStack.length > 1) {
+            if(!mapRef.current) return;
             const stackTop = peek(historyStack)
             setView(stackTop.view)
             updateScrollBehaviour(stackTop, mapRef)
             setBounds(stackTop, mapRef, setOverlays, idBoundsMap)
             if (stackTop.view === 'ROUTE') setScopedMarker(((stackTop.selectedElement) as ChannelType).contents.at(0))
+
         } else {
             panTo([mapCenter.lng, mapCenter.lat], getZoomLevel("IND"), mapRef)
             setView("IND")
@@ -172,6 +166,8 @@ export const BaseMap: React.FC<MapProps> = ({
 
     }, [historyStack])
 
+
+    
 
     useEffect(() => {
         if (scopedMarker) {
@@ -188,12 +184,12 @@ export const BaseMap: React.FC<MapProps> = ({
     document.onkeydown = onKeyPress;
 
 
-    function onKeyPress(e:KeyboardEvent){
-        if((e.key === 'ArrowRight' || e.key==='ArrowLeft') && view === 'ROUTE' && scopedMarker!==null){
+    function onKeyPress(e: KeyboardEvent) {
+        if ((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && view === 'ROUTE' && scopedMarker !== null) {
             e.preventDefault()
             const routePoints = (peek(historyStack).selectedElement as ChannelType).contents
-            setScopedMarker(cycle(scopedMarker,(peek(historyStack).selectedElement as ChannelType).contents, 
-            (e.key === 'ArrowRight' ? "UP" : "DOWN" )))
+            setScopedMarker(cycle(scopedMarker, (peek(historyStack).selectedElement as ChannelType).contents,
+                (e.key === 'ArrowRight' ? "UP" : "DOWN")))
         }
     }
 
@@ -209,6 +205,7 @@ export const BaseMap: React.FC<MapProps> = ({
                     latitude: mapCenter.lat,
                     zoom: zoom
                 }}
+                projection={{ name: 'globe' }}
                 id="primary_map"
                 ref={mapRef}
                 style={{ zIndex: 0 }}
@@ -242,8 +239,8 @@ export const BaseMap: React.FC<MapProps> = ({
                             topOfStack={peek(historyStack)}
                             states={states}
                             scopedMarker={scopedMarker}
-                            
-                            />
+
+                        />
                     </div>
                 </Box>
                 {view === "IND" && states && states.map((state: State) => {
@@ -262,7 +259,7 @@ export const BaseMap: React.FC<MapProps> = ({
                         communities,
                     )
                     }
-                    {hoverRoute && <ChannelPopup isFromHover={true} color={idColorMap[hoverRoute.uniqueID]} isOpen={isChannelPopupOpen} handleClose={setIsChannelPopupOpen} channel={hoverRoute} fixed={false}></ChannelPopup>}
+                    {hoverRoute && mapRef.current && <ChannelPopup isFromHover={true} color={idColorMap[hoverRoute.uniqueID]} isOpen={isChannelPopupOpen} handleClose={setIsChannelPopupOpen} channel={hoverRoute} fixed={false} map={mapRef.current.getMap()}></ChannelPopup>}
                 </div>
                 }
                 {view === "COMM" && <div id="route-start-points">
@@ -276,13 +273,14 @@ export const BaseMap: React.FC<MapProps> = ({
                         communities
                     )
                     }
-                    {hoverRoute &&
+                    {hoverRoute && mapRef.current &&
                         <ChannelPopup
                             isFromHover={true}
                             color={idColorMap[hoverRoute.uniqueID]}
                             isOpen={isChannelPopupOpen}
                             handleClose={setIsChannelPopupOpen}
                             channel={hoverRoute}
+                            map={mapRef.current.getMap()}
                             fixed={false}></ChannelPopup>}
                 </div>}
                 {view === "ROUTE" && scopedMarker && <div id="route-points">
@@ -293,20 +291,21 @@ export const BaseMap: React.FC<MapProps> = ({
                         idColorMap,
                         communities
                     )}
-                    {scopedMarker &&
+                    {scopedMarker && mapRef.current &&
                         <ContentPopup
-                            onNextArrowClick={() => { setScopedMarker(cycle(scopedMarker,(peek(historyStack).selectedElement as ChannelType).contents, "UP")) }}
+                            onNextArrowClick={() => { setScopedMarker(cycle(scopedMarker, (peek(historyStack).selectedElement as ChannelType).contents, "UP")) }}
                             onPrevArrowClick={() => { setScopedMarker(cycle(scopedMarker, (peek(historyStack).selectedElement as ChannelType).contents, "DOWN")) }}
                             isOpen={isContentPopupOpen}
                             onClose={setIsContentPopupOpen}
                             content={scopedMarker}
+                            map={mapRef.current.getMap()}
                             color={idColorMap[scopedMarker.id]}
                         ></ContentPopup>
-                }
+                    }
                 </div>}
 
 
-                
+
 
 
                 <div style={{ position: "absolute", top: "50px", right: '150px' }}>
@@ -334,8 +333,8 @@ export const BaseMap: React.FC<MapProps> = ({
 
                     );
                 })}
-                <div style={{ position: 'absolute', bottom: 50, left: 0, width: "100%", backgroundColor: "white", }}>
-                    <MapBreadCrumbs history={historyStack}></MapBreadCrumbs>
+                <div style={{ position: 'absolute', bottom: 0, left: 0, width: "100%", backgroundColor: "white", zIndex: 999 }}>
+                    <MapBreadCrumbs history={historyStack} setHistory={setHistoryStack}></MapBreadCrumbs>
                 </div>
 
             </Map>

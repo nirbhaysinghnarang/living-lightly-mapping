@@ -1,9 +1,6 @@
 import "@fontsource/lato"; // Defaults to weight 400
 import "@fontsource/lato/400-italic.css"; // Specify weight and style
 import "@fontsource/lato/400.css"; // Specify weight
-import "@fontsource/source-serif-4"; // Defaults to weight 400
-import "@fontsource/source-serif-4/400-italic.css"; // Specify weight and style
-import "@fontsource/source-serif-4/400.css"; // Specify weight
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Gallery } from "./Components/Gallery/gallery.tsx";
 import { BaseMap } from './Components/Map/map.base.tsx';

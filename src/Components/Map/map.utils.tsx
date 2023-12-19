@@ -7,8 +7,9 @@ import { ChannelContent, ChannelType } from "../../Types/Channel.types";
 import { HistoryStack, append, peek } from "../../Types/History.stack.type";
 import { createLineGeoJson } from "./Geometry/lineGeoJson";
 import { createLayer } from "./Geometry/routeLayer";
+import { RadioButtonUnchecked, RadioButtonChecked, Circle } from "@mui/icons-material";
 export const panTo = (coords: [number, number], zoom: number, mapRef: React.RefObject<MapRef>) => {
-    const latOffset = -0.02; 
+    const latOffset = -0.05; 
     const adjustedCoords: [number, number] = [coords[0], coords[1] + latOffset];
 
     if (mapRef.current) {
@@ -77,10 +78,12 @@ export function renderRoutes(
                                 setHistory([...stack])
                             }}
                         >
-                            <img src={imageHighlighted.url} style={{ margin: 'auto', width: '30px' }} alt="route-pt" />
+
+                            <RadioButtonChecked sx={{color:idColorMap[route.uniqueID], zIndex:99, fontSize:32}}></RadioButtonChecked>
                         </div>}
                     {index !== 0 && <div >
-                        <img src={image.url} style={{ margin: 'auto', width: '20px' }} alt="route-pt" />
+                        <Circle sx={{color:idColorMap[route.uniqueID], zIndex:99, fontSize:30}}></Circle>
+
                     </div>}
                 </Marker>
             </div>
@@ -145,13 +148,13 @@ export function renderRoutePoints(
                         <Stack justifyContent="center" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginLeft: "45%" }}>
                             {(scopedMarker.id === marker.id) ? (
                                 <>
-                                    <img src={image.url} style={{ marginRight: '10px', width: '30px' }} />
-                                    <p style={{ fontFamily: 'Source Serif', color: color, fontSize: '20px', fontWeight: 700 }}>{marker.tags.length > 0 ? marker.tags[0].tag : ""}</p>
+                                   <RadioButtonChecked  style={{ marginRight: '10px', width: '30px', color:color, zIndex:99 }} />
+                                    <p style={{ fontFamily: 'Source Serif ', color: color, fontSize: '20px'}}>{marker.tags.length > 0 ? marker.tags[0].tag : ""}</p>
                                 </>
                             ) : (
                                 <>
-                                    <img src={image.url} style={{ marginRight: '10px', width: '20px' }} />
-                                    <p style={{ fontFamily: 'Source Serif', color: color, fontSize: '18px' }}>{marker.tags.length > 0 ? marker.tags[0].tag : ""}</p>
+                                   <Circle  style={{ marginRight: '10px', width: '30px', color:color, zIndex:99 }} />
+                                    <p style={{ fontFamily: 'Source Serif ', color: color, fontSize: '18px' }}>{marker.tags.length > 0 ? marker.tags[0].tag : ""}</p>
                                 </>
                             )}
                         </Stack>

@@ -5,13 +5,15 @@ import { Button, Card, IconButton, Stack, Typography } from "@mui/material";
 import { Popup } from "react-map-gl";
 import { ChannelContent, ChannelType } from "../../../Types/Channel.types";
 import ExpandableImage from "../../Gallery/expandable.image";
+import { Map as MapBoxMap } from "mapbox-gl";
 interface ChannelPopupProps {
     channel: ChannelType,
     fixed: boolean,
     isOpen: boolean,
     color: string,
     handleClose: (b: boolean) => void,
-    isFromHover: boolean
+    isFromHover: boolean,
+    map: MapBoxMap
 }
 
 interface ContentPopupProps {
@@ -21,6 +23,9 @@ interface ContentPopupProps {
     onClose: (b: boolean) => void,
     onNextArrowClick: () => void,
     onPrevArrowClick: () => void,
+    map: MapBoxMap,
+    onExpand?: () => void,
+    onShrink?: () => void
 }
 
 interface CommunityPopupProps {
@@ -28,7 +33,10 @@ interface CommunityPopupProps {
     idColorMap: Record<string, string>
 }
 
-export const ChannelPopup: React.FC<ChannelPopupProps> = ({ channel, fixed, isOpen, handleClose, color, isFromHover }: ChannelPopupProps) => {
+
+
+
+export const ChannelPopup: React.FC<ChannelPopupProps> = ({ channel, fixed, isOpen, handleClose, color, isFromHover, map }: ChannelPopupProps) => {
     document.documentElement.style.setProperty('--popup-background-color', color);
     document.documentElement.style.setProperty('--popup-width', "auto")
 
@@ -37,7 +45,7 @@ export const ChannelPopup: React.FC<ChannelPopupProps> = ({ channel, fixed, isOp
         return (<Stack direction="column" flex={1} justifyContent={"flex-start"} alignItems={"flex-start"}>
 
             <Stack direction={"row"} sx={{ width: "100%" }} justifyContent={"space-between"} alignContent={"center"} alignItems={"center"}>
-                <Typography color="white" variant="body1" sx={{ fontFamily: "Source Serif", color: "white", fontSize: "18px", }}>
+                <Typography color="white" variant="body1" sx={{ fontFamily: "Source Serif ", color: "white", fontSize: "18px", }}>
                     {channel.name}
                 </Typography>
                 {!fixed && !isFromHover && <Button onClick={() => { handleClose(false) }}>
@@ -71,17 +79,56 @@ export const ChannelPopup: React.FC<ChannelPopupProps> = ({ channel, fixed, isOp
     </Card>
 }
 
+
+const createSquarePolygon = (centerLat:any, centerLng:any, size:any) => {
+    // Size is the length of each side of the square in degrees
+    const halfSize = size / 2;
+    return [
+        [centerLng - halfSize, centerLat - halfSize],
+        [centerLng + halfSize, centerLat - halfSize],
+        [centerLng + halfSize, centerLat + halfSize],
+        [centerLng - halfSize, centerLat + halfSize],
+    ];
+};
+
+
 export const ContentPopup: React.FC<ContentPopupProps> = ({
     content,
     isOpen,
     onClose,
     onNextArrowClick,
-    onPrevArrowClick
+    onPrevArrowClick,
+    map,
+
+
 }: ContentPopupProps) => {
     if (!content || !isOpen) return;
     document.documentElement.style.setProperty('--popup-background-color', "#F6F5F1");
     document.documentElement.style.setProperty('--popup-width', "405px")
 
+    const onExpand = () => {
+        if (!content.mediafile || !map) return
+        const squareSize = 0.01; //
+        const polygonCoordinates = createSquarePolygon(content.lat, content.long, squareSize);
+        map.addSource(`${content.id}-mediafile`, { 'type': 'image', 'url': 'content.mediafile.url,', 'coordinates': polygonCoordinates })
+        map.addLayer({
+            'id': `${content.id}-mediafile-layer`, type: 'raster', source: `${content.id}-mediafile`, 'paint': {
+                'raster-fade-duration': 0
+            }
+        })
+    }
+    const onShrink = () => {
+        if (!content.id || !map) return;
+        const layerId = `${content.id}-mediafile-layer`;
+        const sourceId = `${content.id}-mediafile`;
+            if (map.getLayer(layerId)) {
+            map.removeLayer(layerId);
+        }
+            if (map.getSource(sourceId)) {
+            map.removeSource(sourceId);
+        }
+    };
+    
 
     return (
         <Popup
@@ -91,14 +138,14 @@ export const ContentPopup: React.FC<ContentPopupProps> = ({
             closeButton={false}
 
             latitude={content.lat} longitude={content.long} offset={50} style={{ padding: 20, zIndex: 10, color: "#f6f6f2" }}>
-            <Stack direction="column" sx={{ width: "100%", height:'100%' }} flex={1} justifyContent={"flex-end"} alignItems={"flex-end"} >
+            <Stack direction="column" sx={{ width: "100%", height: '100%' }} flex={1} justifyContent={"flex-end"} alignItems={"flex-end"} >
 
                 <Stack direction={"column"} sx={{ width: "100%" }} alignItems={"flex-start"}>
-                    <Stack direction={"row"} sx ={{width:"100%"}}alignItems="center" alignContent={"center"} justifyContent={"space-between"}>
+                    <Stack direction={"row"} sx={{ width: "100%" }} alignItems="center" alignContent={"center"} justifyContent={"space-between"}>
                         <Typography color="white" variant="body1" sx={{ fontFamily: "Georgia", color: "#38424D", fontSize: "18px", width: "100%", fontWeight: 'bold' }}>
                             {content.title}
                         </Typography>
-                        <Stack direction={"row"} alignContent={"center"} justifyContent={"space-between"} sx={{width:"100%"}}>
+                        <Stack direction={"row"} alignContent={"center"} justifyContent={"space-between"} sx={{ width: "100%" }}>
                             <IconButton onClick={() => onPrevArrowClick()}>
                                 <KeyboardArrowLeftIcon sx={{ color: "#B39559" }}></KeyboardArrowLeftIcon>
                             </IconButton>
@@ -106,18 +153,17 @@ export const ContentPopup: React.FC<ContentPopupProps> = ({
                                 <KeyboardArrowRightIcon sx={{ color: "#B39559" }}></KeyboardArrowRightIcon>
                             </IconButton>
                             <IconButton onClick={() => { onClose(false) }}>
-                            
+
                                 <Cancel sx={{ color: "#B39559" }}></Cancel>
                             </IconButton>
 
                         </Stack>
                     </Stack>
-                   
-                    {content.tags.length > 0 && content.tags.map(tag => <Typography variant="body1" fontStyle={"italic"}
-                        sx={{ fontFamily: "Source Serif", color: "#38424D", }}
-                    >{tag.tag}</Typography>)}
 
-                    {content.mediafile && <ExpandableImage src={content.mediafile.url}></ExpandableImage>}
+                    {content.tags.length > 0 && content.tags.map(tag => <Typography variant="body1" fontStyle={"italic"}
+                        sx={{ fontFamily: "Source Serif ", color: "#38424D", }}
+                    >{tag.tag}</Typography>)}
+                    {content.mediafile && <ExpandableImage src={content.mediafile.url} onExpand={()=>onExpand()} onShrink={()=>onShrink()}></ExpandableImage>}
                     <Typography color="white" variant="subtitle2" sx={{ fontFamily: 'Lato', fontSize: "16px", color: '#38424D', marginTop: 1 }}>
                         {content.description}
                     </Typography>
@@ -133,12 +179,11 @@ export const CommunityPopup: React.FC<CommunityPopupProps> = ({ community, idCol
         <Stack direction="column" flex={1} justifyContent={"flex-start"} alignItems={"flex-start"}>
 
             <Stack direction={"row"} sx={{ width: "100%" }} justifyContent={"space-between"} alignContent={"center"} alignItems={"center"}>
-                <Typography color="white" variant="body1" sx={{ fontFamily: "Source Serif", color: "white", fontSize: "18px", }}>
+                <Typography color="white" variant="body1" sx={{ fontFamily: "Source Serif ", color: "white", fontSize: "18px", }}>
                     {community.name}
                 </Typography>
 
             </Stack>
-            {community.picture && <ExpandableImage style={{ height: '100px', width: '100%' }} src={community.picture.url}></ExpandableImage>}
             <Typography color="white" variant="subtitle2" sx={{ fontFamily: 'Lato', fontSize: "16px", color: 'white', marginTop: 1 }}>
                 {community.description === "" ? "Community Description" : community.description}
             </Typography>

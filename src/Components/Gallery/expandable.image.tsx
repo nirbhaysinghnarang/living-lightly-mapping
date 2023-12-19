@@ -9,14 +9,18 @@ import { ExpandLess, ExpandMore, ZoomIn, ZoomOut } from '@mui/icons-material';
 interface ExpandableImageProps {
   src: string;
   alt?: string;
-  style:any
+  style?:any,
+  onExpand?:()=>void,
+  onShrink?:()=>void
 }
 
-const ExpandableImage: React.FC<ExpandableImageProps> = ({ src, alt, style }) => {
+const ExpandableImage: React.FC<ExpandableImageProps> = ({ src, alt, onExpand, onShrink }) => {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
+    if(isExpanded && onExpand) {onExpand(); return}
+    if(onShrink) onShrink()
   };
 
   return (

@@ -28,6 +28,23 @@ body {
    url("./Fonts/Gotu.ttf") format("truetype");
  }
 
+ @font-face {
+  font-family: "Source Serif";
+  src: local("Source Serif"),
+   url("./Fonts/SourceSerif4.ttf") format("truetype");
+ }
+
+ @font-face {
+  font-family: "Source Serif Italic";
+  src: local("Source Serif Italic"),
+   url("./Fonts/SourceSerif4-Italic.ttf") format("truetype");
+ }
+
+
+
+
+
+
  
  .mapboxgl-popup-content{
   background-color: var(--popup-background-color);
@@ -39,3 +56,7 @@ body {
  .mapboxgl-popup-anchor-top .mapboxgl-popup-tip{
   border-bottom-color:  var(--popup-background-color); 
  }
+
+ .blurred-map {
+  filter: blur(5px); /* Adjust the pixel value to control the amount of blur */
+}

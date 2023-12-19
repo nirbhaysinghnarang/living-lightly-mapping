@@ -33,7 +33,7 @@ export const DynMenu = ({ history, topOfStack, states, idColorMap, setHistory, s
 
     const renderHeader = (text: string, history: HistoryStack, setHistory: React.Dispatch<React.SetStateAction<HistoryStack>>, isWhite: boolean) => {
         return (<Stack direction={"row"} sx={{ width: "300px" }} justifyContent={"space-between"} alignItems={"center"}>
-            <Typography variant="body1" sx={{ fontWeight: "bold", fontFamily: "Source Serif", color: isWhite ? 'white' : "#191c1b", fontSize: "18px", width: "100%" }}>
+            <Typography variant="body1" sx={{ fontWeight: "bold", fontFamily: "Source Serif ", color: isWhite ? 'white' : "#191c1b", fontSize: "18px", width: "100%" }}>
                 {text}
             </Typography>
             {renderBackButton(history, setHistory)}
@@ -91,10 +91,10 @@ export const DynMenu = ({ history, topOfStack, states, idColorMap, setHistory, s
             const state = states.find(state => state.communities.includes(community))
             return <Stack direction="column" spacing={1}>
                 {renderHeader(`Communities in ${state.name}`, history, setHistory, false)}
-                <Typography variant="body1" sx={{ fontFamily: "Source Serif", color: idColorMap[community.uniqueID], fontSize: "18px", width: "100%" }}>
+                <Typography variant="body1" sx={{ fontFamily: "Source Serif ", color: idColorMap[community.uniqueID], fontSize: "18px", width: "100%" }}>
                     {`${community.name}`}
                 </Typography>
-                {community.picture && <ExpandableImage src={community.picture.url} alt="Community picture"></ExpandableImage>}
+                {community.picture && <ExpandableImage src={community.picture.url} alt="Community picture" ></ExpandableImage>}
                 <Typography variant="subtitle2" sx={{ fontFamily: 'Lato', fontSize: "16px", color: '#38424D', marginTop: 1, width: "100%" }}>
                     {community.description}
                 </Typography>
