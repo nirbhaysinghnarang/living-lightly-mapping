@@ -19,6 +19,7 @@ export type ChannelEditor = {
  */
 export type ChannelType = {
     editors: ChannelEditor[],
+    parent:ChannelType|null
     description: string,
     lat: number,
     long: number,

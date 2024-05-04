@@ -1,4 +1,4 @@
-import { Button, Card, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import { Accordion, AccordionActions, AccordionDetails, AccordionSummary, Button, Card, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { ChannelContent, ChannelType } from "../../Types/Channel.types";
 import { HistoryStack, HistoryStackElement, append, pop } from "../../Types/History.stack.type";
 import { State } from "../../Types/State.type";
@@ -77,9 +77,9 @@ export const DynMenu = ({ history, topOfStack, states, idColorMap, setHistory, s
                         }}
                     >
                         <Stack direction="row" sx={{ width: "100%", alignItems: "center", justifyContent: 'flex-start' }} spacing={1}>
-                        <ChevronRight sx={{ color: idColorMap[community.uniqueID]}}></ChevronRight>
-                        <Typography sx={{ fontFamily: "Lato", fontSize: "16px", color: idColorMap[community.uniqueID] }} >{community.name}</Typography>
-                    </Stack>
+                            <ChevronRight sx={{ color: idColorMap[community.uniqueID] }}></ChevronRight>
+                            <Typography sx={{ fontFamily: "Lato", fontSize: "16px", color: idColorMap[community.uniqueID] }} >{community.name}</Typography>
+                        </Stack>
 
                     </Button>
                 })}
@@ -99,7 +99,7 @@ export const DynMenu = ({ history, topOfStack, states, idColorMap, setHistory, s
                     {community.description}
                 </Typography>
 
-                <Typography variant="subtitle2" sx={{ fontFamily: 'Lato', fontSize: "16px", color: '#38424D', marginTop: 1, width: "100%", fontWeight:"bold" }}>
+                <Typography variant="subtitle2" sx={{ fontFamily: 'Lato', fontSize: "16px", color: '#38424D', marginTop: 1, width: "100%", fontWeight: "bold" }}>
                     Explore Routes
                 </Typography>
 
@@ -126,17 +126,27 @@ export const DynMenu = ({ history, topOfStack, states, idColorMap, setHistory, s
 
         if (topOfStack.view === "ROUTE") {
             const route = topOfStack.selectedElement as ChannelType
+            const community = route.parent
             return <Stack direction="column" spacing={1}>
+
                 {renderHeader(`Explore ${route.name}`, history, setHistory, false)}
+                <Typography variant="body1" sx={{ fontFamily: "Source Serif ", color: idColorMap[community.uniqueID], fontSize: "18px", width: "100%" }}>
+                    {`${community.name} / ${route.name}`}
+                </Typography>
+                {community.picture && <ExpandableImage src={community.picture.url} alt="Community picture" ></ExpandableImage>}
+                <Typography variant="subtitle2" sx={{ fontFamily: 'Lato', fontSize: "16px", color: '#38424D', marginTop: 1, width: "100%" }}>
+                    {community.description}
+                </Typography>
+
                 <Typography variant="subtitle2" sx={{ fontFamily: 'Lato', fontSize: "16px", color: '#38424D', marginTop: 1, width: "100%" }}>
                     {route.description}
                 </Typography>
                 <Stack direction="row" sx={{ width: "100%", alignItems: "center", justifyContent: "space-between" }}>
-                    <Typography variant="subtitle2" sx={{ fontFamily: 'Lato', fontSize: "16px", color: '#38424D', marginTop: 1, width: "100%", fontWeight:"bold" }}>
+                    <Typography variant="subtitle2" sx={{ fontFamily: 'Lato', fontSize: "16px", color: '#38424D', marginTop: 1, width: "100%", fontWeight: "bold" }}>
                         Route Points
                     </Typography>
                     <Tooltip title="Use your keyboard's Left and Right arrow keys to move between route points.">
-                    <KeyboardIcon></KeyboardIcon>
+                        <KeyboardIcon></KeyboardIcon>
 
                     </Tooltip>
 
@@ -149,16 +159,18 @@ export const DynMenu = ({ history, topOfStack, states, idColorMap, setHistory, s
                     }}
                 >
                     <Stack direction="row" sx={{ width: "100%", alignItems: "center", justifyContent: 'flex-start' }} spacing={1}>
-                        <ChevronRight sx={{ color: '#38424D', fontWeight:scopedMarker && routePoint.id === scopedMarker.id ? "bold" : "regular"}}></ChevronRight>
+                        <ChevronRight sx={{ color: '#38424D', fontWeight: scopedMarker && routePoint.id === scopedMarker.id ? "bold" : "regular" }}></ChevronRight>
                         {scopedMarker && routePoint.id === scopedMarker.id ? < Typography sx={{ color: '#38424D', fontFamily: "Lato", fontWeight: "bold" }} >{routePoint.title}</Typography> : < Typography sx={{ color: '#38424D', fontFamily: "Lato" }} >{routePoint.title}</Typography>}
                     </Stack>
                 </Button>)}
+
             </Stack>
         }
 
     }
     const isColorSpecified = topOfStack.view === 'COMM' || topOfStack.view === 'ROUTE'
     let specColor = '#f6f6f2'
+    if (topOfStack.view == 'IND') return <></>
     return <Card sx={{ padding: "10px", width: "300px", background: specColor }}>
         <Stack direction="row" alignContent={"flex-start"} justifyContent={"flex-start"}>
             {renderMenuContent(history, topOfStack, states, isColorSpecified, scopedMarker)}

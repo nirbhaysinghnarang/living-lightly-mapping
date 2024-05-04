@@ -1,5 +1,5 @@
 import { LineLayer } from "mapbox-gl";
-export function createLayer(color:string|undefined, id:string):LineLayer {
+export function createLayer(color:string|undefined, id:string, isHover:boolean=false):LineLayer {
     return {
         id: `route${id}`,
         type: 'line',
@@ -10,6 +10,7 @@ export function createLayer(color:string|undefined, id:string):LineLayer {
         },
         paint: {
             'line-color': typeof color === 'undefined' ? '#4F311C' : color,
+            'line-opacity': isHover ? 0.7 : 1,
             'line-width': 2,
             'line-dasharray': [1, 2]
         }

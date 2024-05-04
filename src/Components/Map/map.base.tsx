@@ -25,6 +25,8 @@ import { DynMenu } from "./map.dyn.menu.tsx";
 import { MenuOptions } from './map.options.menu.tsx';
 import { panTo } from "./map.utils.tsx";
 import { renderCommunityView, renderRouteView, renderStateView } from './map.views.tsx';
+import { geoContains } from "d3-geo";
+
 
 export const BaseMap: React.FC<MapProps> = ({
     assetList,
@@ -68,6 +70,11 @@ export const BaseMap: React.FC<MapProps> = ({
     const [loaded, setLoaded] = useState(false)
 
 
+    const [hoveredStateName, setHoveredStateName] = useState<string>("null")
+
+    const [imm, setImm] = useState(false);
+
+
 
     const recursivelyPopulateColorMap = (states: State[]) => {
         const map: Record<string, string> = {};
@@ -79,7 +86,7 @@ export const BaseMap: React.FC<MapProps> = ({
         }
         for (const state of states) {
             const comms = state.communities
-            for (let i = 0; i < comms.length; i++) {  helper(comms[i], map, i); }
+            for (let i = 0; i < comms.length; i++) { helper(comms[i], map, i); }
         }
         setIdColorMap(map)
         // for (let i = 0; i < communities.length; i++) helper(communities[i], map, i);
@@ -144,19 +151,21 @@ export const BaseMap: React.FC<MapProps> = ({
      */
     const [zoom, setZoom] = useState(getZoomLevel(view))
 
-    useEffect(() => { console.log(view) }, [view])
     /**
      * useEffect Hooks
      */
     //This useEffect hook will automagically set zoom level, proper coordinates, and overlays based on the last element on the stack.
     useEffect(() => {
         if (historyStack && historyStack.length > 1) {
-            if(!mapRef.current) return;
+            if (!mapRef.current) return;
             const stackTop = peek(historyStack)
             setView(stackTop.view)
             updateScrollBehaviour(stackTop, mapRef)
             setBounds(stackTop, mapRef, setOverlays, idBoundsMap)
-            if (stackTop.view === 'ROUTE') setScopedMarker(((stackTop.selectedElement) as ChannelType).contents.at(0))
+            if (stackTop.view === 'ROUTE') {
+                setScopedMarker(((stackTop.selectedElement) as ChannelType).contents.at(0))
+            
+            }
 
         } else {
             panTo([mapCenter.lng, mapCenter.lat], getZoomLevel("IND"), mapRef)
@@ -167,16 +176,19 @@ export const BaseMap: React.FC<MapProps> = ({
     }, [historyStack])
 
 
-    
+
+
+
 
     useEffect(() => {
         if (scopedMarker) {
-            setIsContentPopupOpen(true)
+            if(!imm) setIsContentPopupOpen(true)
             panTo(
                 [scopedMarker.long, scopedMarker.lat],
                 getZoomLevel("ROUTE"),
                 mapRef
             )
+            setImm(false);
         }
     }, [scopedMarker])
 
@@ -192,6 +204,8 @@ export const BaseMap: React.FC<MapProps> = ({
                 (e.key === 'ArrowRight' ? "UP" : "DOWN")))
         }
     }
+
+
 
 
 
@@ -212,6 +226,32 @@ export const BaseMap: React.FC<MapProps> = ({
                 mapStyle={mapStyle}
                 scrollZoom={false}
                 mapboxAccessToken={accessToken}
+                onMouseMove={(e) => {
+                    if(!mapRef.current) return;
+                    if (view === "IND") {
+                        const filtered = states.filter((state: State) => {
+                            return geoContains(state.features, [e.lngLat.lng, e.lngLat.lat]);
+                        });
+                        if (!filtered || filtered.length === 0) {
+                            if (hoveredStateName) { // Reset opacity if there is no state under the cursor but there was one before
+                                mapRef.current.getMap().setPaintProperty(hoveredStateName, 'fill-opacity', 1);
+                                setHoveredStateName("")
+                            }
+                            return null;
+                        }
+                        const state = filtered[0];
+                        if (hoveredStateName !== state.name) {
+                            if (hoveredStateName) {
+                                // Reset opacity of previously hovered state
+                                mapRef.current.getMap().setPaintProperty(hoveredStateName, 'fill-opacity', 1);
+                            }
+                            // Change opacity of the new hovered state
+                            mapRef.current.getMap().setPaintProperty(state.name, 'fill-opacity', 0.5);
+                            setHoveredStateName(state.name)
+                        }
+                    }
+                }}
+
                 onClick={(e) => {
                     if (view === "IND") {
                         const resultOfClick: State | null = handleClickStateLevel(e.lngLat, mapRef, (states))
@@ -245,10 +285,11 @@ export const BaseMap: React.FC<MapProps> = ({
                 </Box>
                 {view === "IND" && states && states.map((state: State) => {
                     return <Source id={state.name} type="geojson" data={state.features} >
-                        <Layer id={state.name} {...createPolygonLayer(state.name)} />
+                        <Layer id={state.name} {...createPolygonLayer(state.name)}
+                        />
                     </Source>
                 })}
-                {view === "STATE" && <div id="community">
+                {view === "STATE" && <div id="community"> && mapRef.current &&
                     {renderStateView(
                         historyStack,
                         setHistoryStack,
@@ -257,12 +298,13 @@ export const BaseMap: React.FC<MapProps> = ({
                         setIsChannelPopupOpen,
                         stateRouteMap,
                         communities,
+                        mapRef.current
                     )
                     }
                     {hoverRoute && mapRef.current && <ChannelPopup isFromHover={true} color={idColorMap[hoverRoute.uniqueID]} isOpen={isChannelPopupOpen} handleClose={setIsChannelPopupOpen} channel={hoverRoute} fixed={false} map={mapRef.current.getMap()}></ChannelPopup>}
                 </div>
                 }
-                {view === "COMM" && <div id="route-start-points">
+                {view === "COMM" && <div id="route-start-points"> && mapRef.current &&
 
                     {renderCommunityView(
                         historyStack,
@@ -270,7 +312,8 @@ export const BaseMap: React.FC<MapProps> = ({
                         idColorMap,
                         setHoverRoute,
                         setIsChannelPopupOpen,
-                        communities
+                        communities,
+                        mapRef.current
                     )
                     }
                     {hoverRoute && mapRef.current &&
@@ -283,13 +326,14 @@ export const BaseMap: React.FC<MapProps> = ({
                             map={mapRef.current.getMap()}
                             fixed={false}></ChannelPopup>}
                 </div>}
-                {view === "ROUTE" && scopedMarker && <div id="route-points">
+                {view === "ROUTE" && scopedMarker && <div id="route-points"> && mapRef.current &&
                     {renderRouteView(
                         historyStack,
                         scopedMarker,
                         setScopedMarker,
                         idColorMap,
-                        communities
+                        communities,
+                        mapRef.current
                     )}
                     {scopedMarker && mapRef.current &&
                         <ContentPopup

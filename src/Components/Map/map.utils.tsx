@@ -7,9 +7,10 @@ import { ChannelContent, ChannelType } from "../../Types/Channel.types";
 import { HistoryStack, append, peek } from "../../Types/History.stack.type";
 import { createLineGeoJson } from "./Geometry/lineGeoJson";
 import { createLayer } from "./Geometry/routeLayer";
+import { useState } from "react";
 import { RadioButtonUnchecked, RadioButtonChecked, Circle } from "@mui/icons-material";
 export const panTo = (coords: [number, number], zoom: number, mapRef: React.RefObject<MapRef>) => {
-    const latOffset = -0.05; 
+    const latOffset = -0.05;
     const adjustedCoords: [number, number] = [coords[0], coords[1] + latOffset];
 
     if (mapRef.current) {
@@ -79,10 +80,10 @@ export function renderRoutes(
                             }}
                         >
 
-                            <RadioButtonChecked sx={{color:idColorMap[route.uniqueID], zIndex:99, fontSize:32}}></RadioButtonChecked>
+                            <RadioButtonChecked sx={{ color: idColorMap[route.uniqueID], zIndex: 99, fontSize: 20 }}></RadioButtonChecked>
                         </div>}
                     {index !== 0 && <div >
-                        <Circle sx={{color:idColorMap[route.uniqueID], zIndex:99, fontSize:30}}></Circle>
+                        <Circle sx={{ color: idColorMap[route.uniqueID], zIndex: 99, fontSize: 15 }}></Circle>
 
                     </div>}
                 </Marker>
@@ -93,19 +94,25 @@ export function renderRoutes(
 
 export function renderRouteLayer(
     route: ChannelType,
-    idColorMap: Record<string, string>
+    idColorMap: Record<string, string>,
+    map: any,
 ) {
-    return <>
+    const layerProps = createLayer(idColorMap[route.uniqueID], route.uniqueID);
+
+    // Add hover effect
+    
+    return (<>
         <Source id={route.uniqueID} type="geojson" data={createLineGeoJson(route.contents)}>
-            {<Layer {...createLayer(idColorMap[route.uniqueID], route.uniqueID)}></Layer>}
+            {<Layer  {...createLayer(idColorMap[route.uniqueID], route.uniqueID)}></Layer>}
         </Source>
     </>
+    );
 }
 
-export function renderRouteLayers(routes: ChannelType[], idColorMap: Record<string, string>) {
+export function renderRouteLayers(routes: ChannelType[], idColorMap: Record<string, string>, map: any) {
     return <>
         {routes.map((route: ChannelType) => {
-            return renderRouteLayer(route, idColorMap)
+            return renderRouteLayer(route, idColorMap, map)
         })}
     </>
 
@@ -148,12 +155,12 @@ export function renderRoutePoints(
                         <Stack justifyContent="center" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginLeft: "45%" }}>
                             {(scopedMarker.id === marker.id) ? (
                                 <>
-                                   <RadioButtonChecked  style={{ marginRight: '10px', width: '30px', color:color, zIndex:99 }} />
-                                    <p style={{ fontFamily: 'Source Serif ', color: color, fontSize: '20px'}}>{marker.tags.length > 0 ? marker.tags[0].tag : ""}</p>
+                                    <RadioButtonChecked style={{ marginRight: '10px', width: '20px', color: color, zIndex: 99 }} />
+                                    <p style={{ fontFamily: 'Source Serif ', color: color, fontSize: '20px' }}>{marker.tags.length > 0 ? marker.tags[0].tag : ""}</p>
                                 </>
                             ) : (
                                 <>
-                                   <Circle  style={{ marginRight: '10px', width: '30px', color:color, zIndex:99 }} />
+                                    <Circle style={{ marginRight: '10px', width: '20px', color: color, zIndex: 99 }} />
                                     <p style={{ fontFamily: 'Source Serif ', color: color, fontSize: '18px' }}>{marker.tags.length > 0 ? marker.tags[0].tag : ""}</p>
                                 </>
                             )}

@@ -107,10 +107,11 @@ export const ContentPopup: React.FC<ContentPopupProps> = ({
     document.documentElement.style.setProperty('--popup-width', "405px")
 
     const onExpand = () => {
+        console.log("HERE")
         if (!content.mediafile || !map) return
         const squareSize = 0.01; //
         const polygonCoordinates = createSquarePolygon(content.lat, content.long, squareSize);
-        map.addSource(`${content.id}-mediafile`, { 'type': 'image', 'url': 'content.mediafile.url,', 'coordinates': polygonCoordinates })
+        map.addSource(`${content.id}-mediafile`, { 'type': 'image', 'url': content.mediafile.url, 'coordinates': polygonCoordinates })
         map.addLayer({
             'id': `${content.id}-mediafile-layer`, type: 'raster', source: `${content.id}-mediafile`, 'paint': {
                 'raster-fade-duration': 0

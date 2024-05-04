@@ -10,6 +10,7 @@ export function renderRouteView(
     setScopedMarker:(marker:ChannelContent)=> void,
     idColorMap: Record<string, string>,
     communities:ChannelType[],
+    map:any
     
 ){
     const top = peek(history)
@@ -28,7 +29,7 @@ export function renderRouteView(
         )}
         {renderRouteLayer(
             route,
-            idColorMap
+            idColorMap,map
         )}
     </div>
 }
@@ -40,7 +41,8 @@ export function renderStateView(
     setHoverRoute: (route: ChannelType) => void,
     displayPopup: (show: boolean) => void,
     stateRouteMap: Record<string, ChannelType[]>,
-    communities: ChannelType[]
+    communities: ChannelType[],
+    map:any
 ) {
     const top = peek(stack)
     const view = top.view
@@ -57,7 +59,7 @@ export function renderStateView(
             stack,
             communities,
         )}
-        {renderRouteLayers(routes, idColorMap)}
+        {renderRouteLayers(routes, idColorMap,map)}
     </>
 
 }
@@ -68,6 +70,7 @@ export function renderCommunityView(
     idColorMap: Record<string, string>,
     setHoverRoute: (route: ChannelType) => void,
     displayPopup: (show: boolean) => void,
+    map:any,
     communities: ChannelType[]) {
     const top = peek(stack)
     const view = top.view
@@ -83,6 +86,6 @@ export function renderCommunityView(
             stack,
             communities
         )}
-        {renderRouteLayers(community.children, idColorMap)}
+        {renderRouteLayers(community.children, idColorMap,map)}
     </>
 }
