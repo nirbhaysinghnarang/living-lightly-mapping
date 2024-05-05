@@ -34,6 +34,13 @@ interface CommunityPopupProps {
 }
 
 
+interface StartPopupProps {
+    route: ChannelType,
+    idColorMap: Record<string, string>,
+    setImm:(b: boolean) => void,
+    setPopupOpen:(b: boolean) => void,
+
+}
 
 
 export const ChannelPopup: React.FC<ChannelPopupProps> = ({ channel, fixed, isOpen, handleClose, color, isFromHover, map }: ChannelPopupProps) => {
@@ -80,7 +87,7 @@ export const ChannelPopup: React.FC<ChannelPopupProps> = ({ channel, fixed, isOp
 }
 
 
-const createSquarePolygon = (centerLat:any, centerLng:any, size:any) => {
+const createSquarePolygon = (centerLat: any, centerLng: any, size: any) => {
     // Size is the length of each side of the square in degrees
     const halfSize = size / 2;
     return [
@@ -107,7 +114,6 @@ export const ContentPopup: React.FC<ContentPopupProps> = ({
     document.documentElement.style.setProperty('--popup-width', "405px")
 
     const onExpand = () => {
-        console.log("HERE")
         if (!content.mediafile || !map) return
         const squareSize = 0.01; //
         const polygonCoordinates = createSquarePolygon(content.lat, content.long, squareSize);
@@ -122,14 +128,14 @@ export const ContentPopup: React.FC<ContentPopupProps> = ({
         if (!content.id || !map) return;
         const layerId = `${content.id}-mediafile-layer`;
         const sourceId = `${content.id}-mediafile`;
-            if (map.getLayer(layerId)) {
+        if (map.getLayer(layerId)) {
             map.removeLayer(layerId);
         }
-            if (map.getSource(sourceId)) {
+        if (map.getSource(sourceId)) {
             map.removeSource(sourceId);
         }
     };
-    
+
 
     return (
         <Popup
@@ -164,7 +170,7 @@ export const ContentPopup: React.FC<ContentPopupProps> = ({
                     {content.tags.length > 0 && content.tags.map(tag => <Typography variant="body1" fontStyle={"italic"}
                         sx={{ fontFamily: "Source Serif ", color: "#38424D", }}
                     >{tag.tag}</Typography>)}
-                    {content.mediafile && <ExpandableImage src={content.mediafile.url} onExpand={()=>onExpand()} onShrink={()=>onShrink()}></ExpandableImage>}
+                    {content.mediafile && <ExpandableImage src={content.mediafile.url} onExpand={() => onExpand()} onShrink={() => onShrink()}></ExpandableImage>}
                     <Typography color="white" variant="subtitle2" sx={{ fontFamily: 'Lato', fontSize: "16px", color: '#38424D', marginTop: 1 }}>
                         {content.description}
                     </Typography>
@@ -190,4 +196,32 @@ export const CommunityPopup: React.FC<CommunityPopupProps> = ({ community, idCol
             </Typography>
         </Stack>
     </Card>
+}
+
+export const StartPopup: React.FC<StartPopupProps> = ({ route, idColorMap, setImm,setPopupOpen }: StartPopupProps) => {
+    if (!route || !route.contents || route.contents.length === 0) {
+        return <div>No data available</div>; // Or some other placeholder
+    }
+
+    const backgroundColor = idColorMap[route.uniqueID];
+    document.documentElement.style.setProperty('--popup-background-color', backgroundColor);
+    document.documentElement.style.setProperty('--popup-width', "auto");
+
+    const { lat, long } = route.contents.at(0);
+
+    return (
+        <Popup
+            className={"popupContent"}
+            closeOnClick={false}
+            anchor="top"
+            closeButton={false}
+            latitude={lat} longitude={long} offset={50} style={{ padding: 20, zIndex: 10, color: backgroundColor }}>
+            <Button onClick={()=>{setImm(false);setPopupOpen(true)}}>
+                <Typography color="white" variant="body1" sx={{ fontFamily: "Source Serif ", color: "white", fontSize: "18px" }}>
+                    Start here
+                </Typography>
+            </Button>
+
+        </Popup>
+    );
 }

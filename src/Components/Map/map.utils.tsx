@@ -65,7 +65,7 @@ export function renderRoutes(
                                 const view = top.view
                                 if (view === "ROUTE") return;
                                 if (view === 'STATE') {
-                                    const commununity = communities.find(community => community.children.map(child => child.uniqueID).includes(route.uniqueID))
+                                    const commununity = route.parent;
                                     append(stack, {
                                         view: "COMM",
                                         selectedElement: commununity

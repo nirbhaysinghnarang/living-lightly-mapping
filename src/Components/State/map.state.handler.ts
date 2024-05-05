@@ -100,7 +100,6 @@ export function updateState(
             break;
 
         case "ChannelType":
-            console.log("HERER")
             const channelType = (element.selectedElement) as ChannelType
             const isCommunity = element.view === "COMM"
             if (isCommunity) {

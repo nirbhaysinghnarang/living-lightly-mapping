@@ -19,7 +19,7 @@ import { handleClickStateLevel } from "./Events/handleClick.ts";
 import { createPolygonLayer } from "./Geometry/drawStates.ts";
 import { getBounds } from './Geometry/getBounds.ts';
 import { getZoomLevel } from "./Geometry/getZoomLevel.ts";
-import { ChannelPopup, ContentPopup } from "./Popups/popup.main.tsx";
+import { ChannelPopup, ContentPopup, StartPopup } from "./Popups/popup.main.tsx";
 import { MapBreadCrumbs } from "./map.breadcrumbs.tsx";
 import { DynMenu } from "./map.dyn.menu.tsx";
 import { MenuOptions } from './map.options.menu.tsx';
@@ -163,6 +163,7 @@ export const BaseMap: React.FC<MapProps> = ({
             updateScrollBehaviour(stackTop, mapRef)
             setBounds(stackTop, mapRef, setOverlays, idBoundsMap)
             if (stackTop.view === 'ROUTE') {
+                setImm(true)
                 setScopedMarker(((stackTop.selectedElement) as ChannelType).contents.at(0))
             
             }
@@ -176,21 +177,22 @@ export const BaseMap: React.FC<MapProps> = ({
     }, [historyStack])
 
 
-
+    const prevScopedMarker = useRef<ChannelContent|ChannelType>();
 
 
 
     useEffect(() => {
-        if (scopedMarker) {
-            if(!imm) setIsContentPopupOpen(true)
+        if (scopedMarker && (prevScopedMarker.current !== scopedMarker)) {
+            if (!imm) setIsContentPopupOpen(true);
             panTo(
                 [scopedMarker.long, scopedMarker.lat],
                 getZoomLevel("ROUTE"),
                 mapRef
-            )
-            setImm(false);
+            );
+            prevScopedMarker.current = scopedMarker; 
         }
-    }, [scopedMarker])
+    }, [scopedMarker, imm]);
+
 
 
     document.onkeydown = onKeyPress;
@@ -335,7 +337,10 @@ export const BaseMap: React.FC<MapProps> = ({
                         communities,
                         mapRef.current
                     )}
-                    {scopedMarker && mapRef.current &&
+
+
+                    {scopedMarker && mapRef.current && imm && <StartPopup setImm={setImm} setPopupOpen={setIsContentPopupOpen}route={peek(historyStack).selectedElement as ChannelType} idColorMap={idColorMap}></StartPopup>}
+                    {scopedMarker && mapRef.current && 
                         <ContentPopup
                             onNextArrowClick={() => { setScopedMarker(cycle(scopedMarker, (peek(historyStack).selectedElement as ChannelType).contents, "UP")) }}
                             onPrevArrowClick={() => { setScopedMarker(cycle(scopedMarker, (peek(historyStack).selectedElement as ChannelType).contents, "DOWN")) }}
