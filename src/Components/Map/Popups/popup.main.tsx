@@ -170,7 +170,7 @@ export const ContentPopup: React.FC<ContentPopupProps> = ({
                     </Stack>
 
                     {content.tags.length > 0 && content.tags.filter(tag=>tag.thumbnail==null).map(tag => <Typography variant="body1" fontStyle={"italic"}
-                        sx={{ fontFamily: "Source Serif ", color: "#38424D", }}
+                        sx={{ fontFamily: "Source Serif ", color: "#38424D", marginBottom:"10px"}}
                     >{tag.tag}</Typography>)}
                     {content.mediafile && <ExpandableImage src={content.mediafile.url} onExpand={() => onExpand()} onShrink={() => onShrink()}></ExpandableImage>}
                     <Typography color="white" variant="subtitle2" sx={{ fontFamily: 'Lato', fontSize: "16px", color: '#38424D', marginTop: 1 }}>
