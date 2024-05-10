@@ -120,7 +120,7 @@ export function renderRouteLayers(routes: ChannelType[], idColorMap: Record<stri
 
 
 
-function isTagImageType(tags: Tag[]) {
+export function isTagImageType(tags: Tag[]) {
     for (const tag of tags) {
         if (tag.thumbnail !== null) return [true, tag]
     }
@@ -142,7 +142,6 @@ export function renderRoutePoints(
 
     const route = top.selectedElement as ChannelType
     const routePoints = route.contents
-    const flag = isTagImageType(scopedMarker.tags);
 
     return (
         <>
@@ -176,7 +175,6 @@ export function renderRoutePoints(
                                     <p style={{ fontFamily: 'Source Serif ', color: color, fontSize: '18px' }}>{marker.tags.length > 0 ? marker.tags[0].tag : ""}</p>
                                 </>
                             )}
-                            {flag[0] && <img src={(flag[1] as Tag)?.thumbnail.url} height={20} width={20} style={{ margin: '20px' }}></img>}
 
 
 

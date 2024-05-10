@@ -6,6 +6,7 @@ import { Popup } from "react-map-gl";
 import { ChannelContent, ChannelType } from "../../../Types/Channel.types";
 import ExpandableImage from "../../Gallery/expandable.image";
 import { Map as MapBoxMap } from "mapbox-gl";
+import { isTagImageType } from "../map.utils";
 interface ChannelPopupProps {
     channel: ChannelType,
     fixed: boolean,
@@ -112,7 +113,7 @@ export const ContentPopup: React.FC<ContentPopupProps> = ({
     if (!content || !isOpen) return;
     document.documentElement.style.setProperty('--popup-background-color', "#F6F5F1");
     document.documentElement.style.setProperty('--popup-width', "405px")
-
+    const flag = isTagImageType(content.tags)
     const onExpand = () => {
         if (!content.mediafile || !map) return
         const squareSize = 0.01; //
@@ -149,6 +150,7 @@ export const ContentPopup: React.FC<ContentPopupProps> = ({
 
                 <Stack direction={"column"} sx={{ width: "100%" }} alignItems={"flex-start"}>
                     <Stack direction={"row"} sx={{ width: "100%" }} alignItems="center" alignContent={"center"} justifyContent={"space-between"}>
+                        {flag[0] && <img height={25} src={(flag[1] as Tag).thumbnail.url} style={{marginRight:"10px"}}></img>}
                         <Typography color="white" variant="body1" sx={{ fontFamily: "Georgia", color: "#38424D", fontSize: "18px", width: "100%", fontWeight: 'bold' }}>
                             {content.title}
                         </Typography>

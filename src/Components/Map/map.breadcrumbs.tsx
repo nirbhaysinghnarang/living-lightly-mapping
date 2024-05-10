@@ -31,10 +31,10 @@ export const MapBreadCrumbs: React.FC<MapBreadCrumbsProps> = ({ history, setHist
     }
 
 
-    return <Breadcrumbs sx={{ padding: '10px', opacity: 0.9, background: "#f6f6f2", zIndex: 99 }} separator={<NavigateNext fontSize="small" />}>
+    return <Breadcrumbs sx={{ opacity: 0.9, background: "transparent", zIndex: 99 }} separator={<NavigateNext fontSize="small" style={{color:'white'}}/>}>
         {history.map((elem, index) => {
             return <Button onClick={()=>onElementClick(elem)} style={{'textTransform':'none'}}>
-                <Typography sx={{ fontFamily: "Source Serif ", color: "black", fontStyle: "italic" }}>{getDisplayNameFromElement(elem, index)}</Typography>
+                <Typography sx={{ fontFamily: "Source Serif ", color: "white", fontStyle: "italic" }}>{getDisplayNameFromElement(elem, index)}</Typography>
             </Button>
         })}
     </Breadcrumbs>

@@ -1,5 +1,5 @@
 import { ArrowCircleLeftTwoTone } from '@mui/icons-material';
-import { Box, IconButton } from '@mui/material';
+import { Box, IconButton, Stack } from '@mui/material';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import React, { useEffect, useRef, useState } from 'react';
 import { Layer, Map, Marker, Projection, Source } from 'react-map-gl';
@@ -405,8 +405,12 @@ export const BaseMap: React.FC<MapProps> = ({
 
                     );
                 })}
-                <div style={{ position: 'absolute', bottom: 0, left: 0, width: "100%", backgroundColor: "white", zIndex: 999 }}>
+                <div style={{ position: 'absolute', bottom: 0, left: 0, width: "100%",  backgroundImage: `url('Assets/Images/footer.png')`, zIndex: 999, height:'100px', alignContent:'center', paddingTop:'10px', paddingLeft:'10px'}}>
+                    <Stack direction="row" sx={{width:"100%"}} justifyContent={"space-between"} alignContent={"center"}>
                     <MapBreadCrumbs history={historyStack} setHistory={setHistoryStack}></MapBreadCrumbs>
+                    <img src="Assets/Images/logo.png" height={50} style={{marginRight:'20px'}}></img>
+
+                    </Stack>
                 </div>
 
             </Map>
