@@ -47,7 +47,11 @@ export type ChannelType = {
  * There is no nested data here
  */
 
-export type Tag = {id:number, tag:string}
+
+export type TagThumb = {
+    url:string
+}
+export type Tag = {id:number, tag:string, thumbnail:Nullable<TagThumb>}
 export type ChannelContent = {
     parent: ChannelType,
     description: Nullable<string>,

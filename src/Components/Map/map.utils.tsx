@@ -3,7 +3,7 @@ import React, { ReactNode } from "react";
 import { Layer, MapRef, Marker, Source } from 'react-map-gl';
 import { routeAssetSelected, routeAssets } from "../../Constants/assets";
 import { Asset } from '../../Types/Asset.type';
-import { ChannelContent, ChannelType } from "../../Types/Channel.types";
+import { ChannelContent, ChannelType, Tag } from "../../Types/Channel.types";
 import { HistoryStack, append, peek } from "../../Types/History.stack.type";
 import { createLineGeoJson } from "./Geometry/lineGeoJson";
 import { createLayer } from "./Geometry/routeLayer";
@@ -100,7 +100,7 @@ export function renderRouteLayer(
     const layerProps = createLayer(idColorMap[route.uniqueID], route.uniqueID);
 
     // Add hover effect
-    
+
     return (<>
         <Source id={route.uniqueID} type="geojson" data={createLineGeoJson(route.contents)}>
             {<Layer  {...createLayer(idColorMap[route.uniqueID], route.uniqueID)}></Layer>}
@@ -115,8 +115,18 @@ export function renderRouteLayers(routes: ChannelType[], idColorMap: Record<stri
             return renderRouteLayer(route, idColorMap, map)
         })}
     </>
-
 }
+
+
+
+
+function isTagImageType(tags: Tag[]) {
+    for (const tag of tags) {
+        if (tag.thumbnail !== null) return [true, tag]
+    }
+    return [false, null]
+}
+
 
 export function renderRoutePoints(
     scopedMarker: ChannelContent,
@@ -132,6 +142,8 @@ export function renderRoutePoints(
 
     const route = top.selectedElement as ChannelType
     const routePoints = route.contents
+    const flag = isTagImageType(scopedMarker.tags);
+
     return (
         <>
             {routePoints.map((marker: ChannelContent) => {
@@ -164,6 +176,10 @@ export function renderRoutePoints(
                                     <p style={{ fontFamily: 'Source Serif ', color: color, fontSize: '18px' }}>{marker.tags.length > 0 ? marker.tags[0].tag : ""}</p>
                                 </>
                             )}
+                            {flag[0] && <img src={(flag[1] as Tag)?.thumbnail.url} height={20} width={20} style={{ margin: '20px' }}></img>}
+
+
+
                         </Stack>
                     </Marker>
                 </Stack>

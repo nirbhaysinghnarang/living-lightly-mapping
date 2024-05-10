@@ -8,7 +8,7 @@ import { BASE_MAP_BOUNDS } from '../../Constants/map.ts';
 import { cycle } from "../../Functions/cycle.ts";
 import { fetchData } from "../../Functions/fetchData.ts";
 import { BoxBound } from '../../Types/Bounds.type.ts';
-import { ChannelContent, ChannelType } from "../../Types/Channel.types.ts";
+import { ChannelContent, ChannelType, Tag } from "../../Types/Channel.types.ts";
 import { HistoryStack, HistoryStackElement, append, initialStackElement, peek, pop } from "../../Types/History.stack.type.ts";
 import { MapProps } from "../../Types/MapProps";
 import { Overlay } from "../../Types/Overlay.type.ts";
@@ -101,6 +101,29 @@ export const BaseMap: React.FC<MapProps> = ({
         communities.forEach((community: ChannelType) => helper(community, map))
         setIdBoundsMap(map)
     }
+
+
+    const unnestTags = (communities: ChannelType[]): Tag[] => {
+        const helper = (communities: ChannelType[], tags: Tag[] = []): Tag[] => {
+            if (communities.length === 0) return tags;
+    
+            for (const comm of communities) {
+                if (comm.contents) {
+                    for (const content of comm.contents) {
+                        tags = tags.concat(content.tags);
+                    }
+                }
+                if (comm.children) {
+                    tags = helper(comm.children, tags);
+                }
+            }
+            return tags;
+        };
+    
+        return helper(communities);
+    };
+
+
     const populateStateRouteMap = (states: State[]) => {
         let map: Record<string, ChannelType[]> = {}
         states.forEach(state => {
@@ -123,6 +146,7 @@ export const BaseMap: React.FC<MapProps> = ({
     useEffect(() => {
         fetchData(channelId).then((data) => {
             setCommunities(data.children);
+           //console.log(unnestTags(data.children))
             setZoom(getZoomLevel(view));
         })
     }, [])
@@ -201,7 +225,6 @@ export const BaseMap: React.FC<MapProps> = ({
     function onKeyPress(e: KeyboardEvent) {
         if ((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && view === 'ROUTE' && scopedMarker !== null) {
             e.preventDefault()
-            const routePoints = (peek(historyStack).selectedElement as ChannelType).contents
             setScopedMarker(cycle(scopedMarker, (peek(historyStack).selectedElement as ChannelType).contents,
                 (e.key === 'ArrowRight' ? "UP" : "DOWN")))
         }
