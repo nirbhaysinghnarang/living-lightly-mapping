@@ -19,7 +19,7 @@ export function handleClickStateLevel(position: LngLat, mapRef: React.RefObject<
         
         panTo(
             state.center.geometry.coordinates as [number, number],
-            getZoomLevel("Community"),
+            getZoomLevel("COMM"),
             mapRef
         )
         return state

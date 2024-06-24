@@ -7,6 +7,7 @@ import { ChannelContent, ChannelType } from "../../../Types/Channel.types";
 import ExpandableImage from "../../Gallery/expandable.image";
 import { Map as MapBoxMap } from "mapbox-gl";
 import { isTagImageType } from "../map.utils";
+import { Tag } from "../../../Types/Channel.types";
 interface ChannelPopupProps {
     channel: ChannelType,
     fixed: boolean,
